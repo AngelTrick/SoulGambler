@@ -31,7 +31,7 @@ public class EnemyController : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-        _animator = GetComponent<Animator>();
+        _animator = GetComponentInChildren<Animator>();
         StateMachine = new EnemyStateMachine();
         IdleState = new EnemyIdleState(this, StateMachine);
         ChaseState = new EnemyChaseState(this, StateMachine);
@@ -108,7 +108,12 @@ public class EnemyController : MonoBehaviour
         }
         if (GameManager.Instance != null && GameManager.Instance.expGemPrefab != null)
         {
-            Instantiate(GameManager.Instance.expGemPrefab, transform.position, Quaternion.identity);
+            GameObject gemobj = Instantiate(GameManager.Instance.expGemPrefab, transform.position, Quaternion.identity);
+            ExpGem gemScript = gemobj.GetComponent<ExpGem>();
+            if (gemScript != null && PlayerController.Instance != null)
+            {
+                gemScript.Initialize(PlayerController.Instance.transform);
+            }
         }
         StartCoroutine(CoDead());
     }

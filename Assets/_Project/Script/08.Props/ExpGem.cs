@@ -7,27 +7,28 @@ public class ExpGem : MonoBehaviour
     [Header("Setting")]
     public int expAmount = 10;
 
-    private Transform player;
+    private Transform _targetPlayer;
     private bool isMagnet = false;
+    private float _magnetSpeed = 15f;
+    public void Initialize(Transform player)
+    {
+        _targetPlayer = player;
+        isMagnet = false;
+    }
     private void OnEnable()
     {
+        Initialize(null);
         isMagnet = false;
-        player = null;
-        GetComponent<Collider>().enabled = true;
     }
     private void Update()
     {
-        if(player == null)
-        {
-            var p = FindAnyObjectByType<PlayerController>();
-            if (p != null) player = p.transform;
-            return;
-        }
+        if(_targetPlayer == null) return;
+        
         if (isMagnet)
         {
-            transform.position = Vector3.MoveTowards(transform.position, player.position, 15f * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, _targetPlayer.position, _magnetSpeed * Time.deltaTime);
         }
-        else if (Vector3.Distance(transform.position, player.position) < 3f) { isMagnet = true; }
+        else if (Vector3.Distance(transform.position, _targetPlayer.position) < 3f) { isMagnet = true; }
     }
     private void OnTriggerEnter(Collider other)
     {
