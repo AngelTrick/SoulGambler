@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.InputSystem.Processors;
 using UnityEngine.UIElements;
+using DG.Tweening;
 
 public class EnemyController : MonoBehaviour
 {
@@ -15,58 +15,58 @@ public class EnemyController : MonoBehaviour
     public EnemyAttackState AttackState { get; private set; }
     #endregion
     public EnemyDataSO enemyData;
-    [Header("½ºÅÈ")]
-    [HideInInspector] public float maxHP;
-    [HideInInspector] public float moveSpeed ;
-    [HideInInspector] public float detectRange;
+
+    [HideInInspector] public Rigidbody _rb;
+    [HideInInspector] public Animator _animator;
+    [HideInInspector] public SpriteRenderer _sr;
+    [HideInInspector] public Collider _col;
+
+    [HideInInspector] public Transform _target;
+
+    [HideInInspector] public float moveSpeed;
     [HideInInspector] public float attackRange;
+    [HideInInspector] public float detectRange;
     [HideInInspector] public float damage;
+    [HideInInspector] public float maxHP;
     private float _currentHP;
+    private GameObject _originalPrefab;
+    private static readonly int HashHit = Animator.StringToHash("Hit");
+    private static readonly int HashDead = Animator.StringToHash("Dead");
+    
 
-    public Rigidbody _rb { get; private set; }
-    public Transform _target { get; private set; }
-
-    public Animator _animator { get; private set; }
+    public float MoveSpeed => enemyData != null ? enemyData.moveSpeed : 3f;
+    public float AttackRange => enemyData != null ? enemyData.attackRange : 1f;
+    public float DetectRange => enemyData != null ? enemyData.detectRange : 10f;
+    public float Damage => enemyData != null ? enemyData.damage : 10f;
+    
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
         _animator = GetComponentInChildren<Animator>();
+        _sr = GetComponentInChildren<SpriteRenderer>();
+        _col = GetComponent<Collider>();
         StateMachine = new EnemyStateMachine();
         IdleState = new EnemyIdleState(this, StateMachine);
         ChaseState = new EnemyChaseState(this, StateMachine);
         AttackState = new EnemyAttackState(this, StateMachine);
-        if(enemyData != null) 
-        {
-            maxHP = enemyData.maxHP;
-            moveSpeed = enemyData.moveSpeed;
-            detectRange = enemyData.detectRange;
-            attackRange = enemyData.attackRange;
-            damage = enemyData.damage;
 
-        }
     }
-    private void OnEnable()
+    public void Init(GameObject prefab)
     {
-        if(_animator != null)
-        {
-            _animator.Rebind();
-            _animator.Update(0f);
-        }
-        _currentHP = maxHP;
-        if(_rb != null)
-        {
-            _rb.velocity = Vector3.zero;
-            _rb.angularVelocity = Vector3.zero;
-        }
-        if(PlayerController.Instance != null)
+        _originalPrefab = prefab;
+        if (enemyData != null) _currentHP = enemyData.maxHP;
+        if (_col != null) _col.enabled = true;
+        if (_sr != null) _sr.color = Color.white;
+        if (_rb != null) _rb.velocity = Vector3.zero;
+
+        if (PlayerController.Instance != null)
         {
             _target = PlayerController.Instance.transform;
         }
         StateMachine.Initialize(IdleState);
-        GetComponent<Collider>().enabled = true;
     }
-    
+
     private void Update()
     {
         StateMachine.currentState.LogicUpdate();
@@ -78,51 +78,53 @@ public class EnemyController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         _currentHP -= damage;
-        Debug.Log($"À¸¾Ç! ³²ÀºÃ¼·Â : {_currentHP}");
-        if(_currentHP > 0 && _animator != null)
+
+        if (_sr != null)
         {
-            _animator.SetTrigger("Hit");
+            _sr.DOKill();
+            _sr.color = Color.red;
+            _sr.DOColor(Color.white, 0.1f);
         }
-        StartCoroutine(FlashRed());
-        if (_currentHP <= 0) OnDead();
-        
-    }
-    System.Collections.IEnumerator FlashRed()
-    {
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        if(sr != null)
+        if (_currentHP > 0)
         {
-            Color originColor = sr.color;
-            sr.color = Color.red;
-            yield return new WaitForSeconds(0.1f);
-            sr.color = originColor;
+            if (_animator != null) _animator.SetTrigger(HashHit);
         }
+        else
+        {
+            OnDead();
+        }
+
     }
     public void OnDead()
     {
         if (GameManager.Instance != null) GameManager.Instance.AddkillCount();
-        if (DataManager.instance != null)
-        {
-            int reward = (enemyData != null) ? enemyData.goldReward : 10;
-            DataManager.instance.AddGold(reward);
-        }
+        if (DataManager.instance != null && enemyData != null) DataManager.instance.AddGold(enemyData.goldReward);
+
         if (GameManager.Instance != null && GameManager.Instance.expGemPrefab != null)
         {
             GameObject gemobj = Instantiate(GameManager.Instance.expGemPrefab, transform.position, Quaternion.identity);
             ExpGem gemScript = gemobj.GetComponent<ExpGem>();
-            if (gemScript != null && PlayerController.Instance != null)
+            if (gemScript != null && _target != null)
             {
-                gemScript.Initialize(PlayerController.Instance.transform);
+                gemScript.Initialize(_target);
             }
         }
-        StartCoroutine(CoDead());
+        if (_col != null) _col.enabled = false;
+        if (_rb != null) _rb.velocity = Vector3.zero;
+        if (_animator != null) _animator.SetTrigger(HashDead);
+
+        Invoke("ReturnToPool", 0.5f);
     }
-    IEnumerator CoDead()
+    private void ReturnToPool()
     {
-        GetComponent<Collider>().enabled = false;
-        _rb.velocity = Vector3.zero;
-        if (_animator != null) _animator.SetTrigger("Dead");
-        yield return new WaitForSeconds(0.5f);
-        gameObject.SetActive(false);
+        if (PoolManager.instance != null)
+        {
+            PoolManager.instance.Return(gameObject, _originalPrefab);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
+
 }

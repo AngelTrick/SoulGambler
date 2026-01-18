@@ -63,7 +63,11 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         if(weaponHitbox != null) weaponHitbox.SetActive(false);
-        
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateHP(_currentHP, currentMaxHP);
+        }
+
     }
     void InitializeStats()
     {
@@ -162,8 +166,10 @@ public class PlayerController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         if (_isDead || _isDashing || _isInvincible) return;
-        _currentHP -= damage; ;
-        Debug.Log($"남은 체력 : {_currentHP}");
+        
+        _currentHP -= damage;
+        Debug.Log($"피격 데미지 {damage} /남은 체력 : {_currentHP}");
+        if (UIManager.Instance != null) UIManager.Instance.UpdateHP(_currentHP, currentMaxHP);
         if(_currentHP <= 0)
         {
             OnDie();

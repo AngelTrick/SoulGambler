@@ -48,7 +48,8 @@ public class UIManager : MonoBehaviour
         if (scoreText == null) return;
         scoreText.text = $"Kills : {count}";
         scoreText.transform.DOKill();
-        scoreText.transform.DOPunchScale(Vector3.one * 0.5f, 0.2f, 10, 1);
+        scoreText.transform.localScale = Vector3.one;
+        scoreText.transform.DOPunchScale(Vector3.one * 0.2f, 0.2f, 10, 1);
     }
     public void TriggerAttackCoolDown(float time)
     {

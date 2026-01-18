@@ -5,30 +5,50 @@ using UnityEngine;
 public class PoolManager : MonoBehaviour
 {
     public static PoolManager instance;
-    public GameObject enemyPrefab;
 
-    private List<GameObject> _pools = new List<GameObject>();
+    private Dictionary<int,Queue<GameObject>> poolDictionary  = new Dictionary<int, Queue<GameObject>>();
     public void Awake()
     {
         instance = this;
     }
-    public GameObject Get()
+    public GameObject Get(GameObject prefab)
     {
-        GameObject select = null;
-        foreach (GameObject item in _pools)
+        int key = prefab.GetInstanceID();
+        if (!poolDictionary.ContainsKey(key))
         {
-            if (!item.activeSelf)
+            poolDictionary.Add(key, new Queue<GameObject>());
+        }
+        Queue<GameObject> queue = poolDictionary[key];
+        GameObject select = null;
+        if (queue.Count > 0)
+        {
+            select = queue.Dequeue();
+            if (select == null)
             {
-                select = item;
+                select = Instantiate(prefab, transform);
+            }
+            else
+            {
                 select.SetActive(true);
-                break;
             }
         }
-        if( select == null)
+        else
         {
-            select = Instantiate(enemyPrefab,transform);
-            _pools.Add(select);
+            select = Instantiate(prefab,transform);
         }
         return select;
+    }
+    public void Return(GameObject obj, GameObject originalPrefab)
+    {
+        int key = originalPrefab.GetInstanceID();
+        if (poolDictionary.ContainsKey(key))
+        {
+            obj.SetActive(false);
+            poolDictionary[key].Enqueue(obj);
+        }
+        else
+        {
+            Destroy(obj);
+        }
     }
 }

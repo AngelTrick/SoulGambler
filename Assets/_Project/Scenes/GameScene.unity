@@ -122667,10 +122667,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
+  m_fontSize: 36
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 40
   m_fontStyle: 0
@@ -123630,8 +123630,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5374a4700bd1fa41a7c953cee3151e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 3452454463251017214, guid: 2536caf5a5dab7841bb8b923453e1941,
-    type: 3}
 --- !u!1 &1475606691
 GameObject:
   m_ObjectHideFlags: 0
@@ -123888,7 +123886,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -6.9501343, y: 12.812622}
+  m_AnchoredPosition: {x: -6.9501953, y: 12.812622}
   m_SizeDelta: {x: -786.09973, y: -374.37482}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &1640792062
@@ -124848,6 +124846,8 @@ MonoBehaviour:
     waveDuration: 9999
     spawnInterval: 0.2
   spawnRadius: 10
+  enemyPrefab: {fileID: 3452454463251017214, guid: 2536caf5a5dab7841bb8b923453e1941,
+    type: 3}
 --- !u!1 &2034464218
 GameObject:
   m_ObjectHideFlags: 0

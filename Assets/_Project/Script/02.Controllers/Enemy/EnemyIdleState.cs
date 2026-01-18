@@ -20,7 +20,7 @@ public class EnemyIdleState : EnemyBaseState
         if (enemy._target == null) return;
         float distance = Vector3.Distance (enemy.transform.position, enemy._target.position);
 
-        if(distance < enemy.detectRange)
+        if(distance < enemy.DetectRange)
         {
             stateMachine.ChangeState(enemy.ChaseState);
         }

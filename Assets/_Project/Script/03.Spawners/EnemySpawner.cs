@@ -15,6 +15,8 @@ public class EnemySpawner : MonoBehaviour
     public Wave[] waves;
     public float spawnRadius = 10f;
 
+    public GameObject enemyPrefab;
+
     private int currentWaveIndex = 0;
     private float waveTimer = 0f;
     private float spawnTImer = 0f;
@@ -48,7 +50,7 @@ public class EnemySpawner : MonoBehaviour
     }
     void SpawnEnemy()
     {
-        GameObject enemy = PoolManager.instance.Get();
+        GameObject enemy = PoolManager.instance.Get(enemyPrefab);
         Vector3 spawnPos = Vector3.zero;
         if (player != null)
         {
@@ -57,7 +59,11 @@ public class EnemySpawner : MonoBehaviour
         }
         enemy.transform.position = spawnPos;
 
-        enemy.SetActive(true);
+        EnemyController enemyScript = enemy.GetComponent<EnemyController>();
+        if(enemyScript != null)
+        {
+            enemyScript.Init(enemyPrefab);
+        }
     }
 }
 
