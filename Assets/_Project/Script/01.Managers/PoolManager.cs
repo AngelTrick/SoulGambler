@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PoolManager : MonoBehaviour
 {
@@ -9,7 +11,24 @@ public class PoolManager : MonoBehaviour
     private Dictionary<int,Queue<GameObject>> poolDictionary  = new Dictionary<int, Queue<GameObject>>();
     public void Awake()
     {
-        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+    private void OnSceneLoaded(Scene scene,LoadSceneMode mode)
+    {
+        poolDictionary.Clear();
+    }
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
     public GameObject Get(GameObject prefab)
     {
