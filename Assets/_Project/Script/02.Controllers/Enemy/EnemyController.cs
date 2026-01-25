@@ -98,7 +98,7 @@ public class EnemyController : MonoBehaviour
     public void OnDead()
     {
         if (GameManager.Instance != null) GameManager.Instance.AddkillCount();
-        if (DataManager.instance != null && enemyData != null) DataManager.instance.AddGold(enemyData.goldReward);
+        if (DataManager.instance != null && enemyData != null) DataManager.instance.AddStageGold(enemyData.goldReward);
 
         if (GameManager.Instance != null && GameManager.Instance.expGemPrefab != null)
         {

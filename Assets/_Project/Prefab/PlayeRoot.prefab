@@ -119,6 +119,37 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &2655801901965916640
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4656058357150102301}
+  m_Layer: 0
+  m_Name: FirePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4656058357150102301
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2655801901965916640}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4316218929651301356}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5284309312159871586
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,6 +163,7 @@ GameObject:
   - component: {fileID: 1319043879315478293}
   - component: {fileID: 3257016650877501348}
   - component: {fileID: 6107931518050690792}
+  - component: {fileID: 3912433951693874210}
   m_Layer: 7
   m_Name: PlayeRoot
   m_TagString: Player
@@ -154,6 +186,7 @@ Transform:
   m_Children:
   - {fileID: 6345088443961376797}
   - {fileID: 5124838250802281757}
+  - {fileID: 4656058357150102301}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7927978944873118104
@@ -169,6 +202,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerData: {fileID: 11400000, guid: 1ab6e25d1569b99418c6a63b5d8c968f, type: 2}
+  currentStance: 0
+  lightColor: {r: 1, g: 1, b: 1, a: 1}
+  darkColor: {r: 0.8, g: 0.4, b: 1, a: 1}
+  currentMaxHP: 0
+  currentMoveSpeed: 0
+  currentDamage: 0
+  currentAttackCoolDown: 0
+  startDiceValue: 0
   weaponHitbox: {fileID: 5351546527092453264}
 --- !u!114 &1319043879315478293
 MonoBehaviour:
@@ -251,6 +292,22 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3912433951693874210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5284309312159871586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56e7c47f1cf4d344c9fc812fd6de2292, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentWeapon: {fileID: 11400000, guid: 71ce408dd361a9645bdb0adc29c3306b, type: 2}
+  firePoint: {fileID: 4656058357150102301}
+  weaponHitbox: {fileID: 0}
+  currentMode: 0
 --- !u!1 &5351546527092453264
 GameObject:
   m_ObjectHideFlags: 0
@@ -267,7 +324,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5124838250802281757
 Transform:
   m_ObjectHideFlags: 0

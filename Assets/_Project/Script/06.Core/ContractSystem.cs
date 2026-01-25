@@ -21,9 +21,9 @@ public class ContractSystem : MonoBehaviour
     public Sprite[] diceSprites;
     private void Start()
     {
-        int gold = PlayerPrefs.GetInt("TotalGold", 0);
-        if(totalGoldText != null)
+        if (DataManager.instance != null && totalGoldText != null)
         {
+            int gold = DataManager.instance.currentGameData.totalGold;
             totalGoldText.text = $"TOTAL GOLD : {gold:N0}";
         }
     }
@@ -40,7 +40,7 @@ public class ContractSystem : MonoBehaviour
 
         if(DataManager.instance != null)
         {
-            DataManager.instance.playerName = nickName;
+            DataManager.instance.currentGameData.playerName = nickName;
         }
         StartCoroutine(RollDiceAndStart());
     }

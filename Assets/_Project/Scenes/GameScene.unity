@@ -121612,8 +121612,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b11e7f14440e894689ad66f13286d5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerName: Player
-  totalGold: 0
+  currentGameData:
+    playerName: Gambler
+    totalGold: 0
+    maxKillCount: 0
+    bestSurvivalTime: 0
+    unlockWeaponIds:
+    - NoviceWand
+    attackDamageLevel: 0
+    moveSpeedLevel: 0
   currentStageGold: 0
 --- !u!1 &544232168
 GameObject:
@@ -124053,6 +124060,22 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3912433951693874210, guid: 00a81d46fd62d3543b3aa1ef7c1d2afb,
+        type: 3}
+      propertyPath: firePoint
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3912433951693874210, guid: 00a81d46fd62d3543b3aa1ef7c1d2afb,
+        type: 3}
+      propertyPath: weaponHitbox
+      value: 
+      objectReference: {fileID: 1356997268}
+    - target: {fileID: 3912433951693874210, guid: 00a81d46fd62d3543b3aa1ef7c1d2afb,
+        type: 3}
+      propertyPath: currentWeapon
+      value: 
+      objectReference: {fileID: 11400000, guid: 0d172903d836b054dadb1aa2e5f93bb8,
+        type: 2}
     - target: {fileID: 4316218929651301356, guid: 00a81d46fd62d3543b3aa1ef7c1d2afb,
         type: 3}
       propertyPath: m_LocalPosition.x

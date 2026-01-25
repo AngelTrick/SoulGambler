@@ -11,6 +11,7 @@ public class WeaponSystem : MonoBehaviour
     public WeaponDataSO currentWeapon;
     [Header("Setup")]
     public Transform firePoint;
+    public GameObject weaponHitbox;
     [Header("Mode Setting")]
     public AttackMode currentMode = AttackMode.Auto;
 
@@ -19,9 +20,12 @@ public class WeaponSystem : MonoBehaviour
     private PlayerInput _playerInput;
     private bool _isFiringPressed = false;
 
+    private bool _isAttacking = false;
+
     private void Awake()
     {
         _playerInput = GetComponent<PlayerInput>();
+        if (weaponHitbox != null) weaponHitbox.SetActive(false);
     }
 
     private void Update()
@@ -48,7 +52,7 @@ public class WeaponSystem : MonoBehaviour
                 UpdateTargeting();
                 if(_target != null || currentMode == AttackMode.Manual)
                 {
-                    Fire();
+                    PerformAttack();
                     _timer = 0f;
                 }
             }
@@ -100,8 +104,18 @@ public class WeaponSystem : MonoBehaviour
         }
         _target = nearest;
     }
-
-    void Fire()
+    void PerformAttack()
+    {
+        if(currentWeapon.weaponType == WeaponType.Ranged)
+        {
+            FireRanged();
+        }
+        else if (currentWeapon.weaponType == WeaponType.Melee)
+        {
+            StartCoroutine(FireMelee());
+        }
+    }
+    void FireRanged()
     {
         if (currentWeapon.projectilePrefab == null) return;
 
@@ -132,6 +146,20 @@ public class WeaponSystem : MonoBehaviour
             float damageMultiplier = (PlayerController.Instance.currentStance == PlayerStance.Dark) ? 1.5f : 1.0f;
             bulletScript.Init(currentWeapon, damageMultiplier, dir);
         }
+    }
+
+    IEnumerator FireMelee()
+    {
+        _isAttacking = true;
+        if (weaponHitbox != null)
+        {
+            weaponHitbox.SetActive(true);
+            yield return new WaitForSeconds(0.3f);
+            weaponHitbox.SetActive(false);
+        }
+        else Debug.LogWarning("근거리 무기용 히트박스가 연결 되지 않았습니다.");
+
+        _isAttacking = false;
     }
     public void CycleMode()
     {

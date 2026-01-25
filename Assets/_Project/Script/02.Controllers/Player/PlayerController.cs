@@ -126,11 +126,11 @@ public class PlayerController : MonoBehaviour
         {
             TryDash();
         }
-        if (_playerInput.actions["Attack"].WasPerformedThisFrame())
+        /*if (_playerInput.actions["Attack"].WasPerformedThisFrame())
         {
             TryAttack();
         }
-
+        */
         if (Keyboard.current.tabKey.wasPressedThisFrame) SwapStance();
         UpdateVisuals();
         if (Keyboard.current.kKey.wasPressedThisFrame) OnDie();
