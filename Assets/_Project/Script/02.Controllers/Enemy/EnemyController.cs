@@ -125,6 +125,7 @@ public class EnemyController : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        transform.DOKill();
     }
 
 }

@@ -6,13 +6,18 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
-
+public enum PlayerStance { Light, Dark};
 
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance;
     [Header("Data")]
     public PlayerDataSO playerData;
+
+    [Header("Stances")]
+    public PlayerStance currentStance = PlayerStance.Light;
+    public Color lightColor = Color.white;
+    public Color darkColor = new Color(0.8f, 0.4f, 1f,1f);
     [HideInInspector] public float currentMaxHP;
     [HideInInspector] public float currentMoveSpeed;
     [HideInInspector] public float currentDamage;
@@ -43,6 +48,8 @@ public class PlayerController : MonoBehaviour
     public bool IsAttacking => _isAttacking;
     public  bool IsDead => _isDead;
 
+    private Transform _cameraTransform;
+
     private void Awake()
     {
         Instance = this;
@@ -59,6 +66,10 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogError("PlayerDataSO가 연결 안되어 있습니다.");
         }
+        if(Camera.main != null)
+        {
+            _cameraTransform = Camera.main.transform;
+        }
     }
     private void Start()
     {
@@ -67,6 +78,7 @@ public class PlayerController : MonoBehaviour
         {
             UIManager.Instance.UpdateHP(_currentHP, currentMaxHP);
         }
+        ApplyStanceEffect();
 
     }
     void InitializeStats()
@@ -94,7 +106,21 @@ public class PlayerController : MonoBehaviour
 
         if (!_isAttacking && !_isDashing)
         {
-            _moveDir = new Vector3(inputVec.x, 0, inputVec.y);
+            if(_cameraTransform != null)
+            {
+                Vector3 camForward = _cameraTransform.forward;
+                Vector3 camRight = _cameraTransform.right;
+                camForward.y = 0;
+                camRight.y = 0;
+                camForward.Normalize();
+                camRight.Normalize();
+                _moveDir = (camForward * inputVec.y + camRight * inputVec.x).normalized;
+            }
+            else
+            {
+                _moveDir = new Vector3(inputVec.x, 0, inputVec.y);
+            }
+            if (inputVec.magnitude < 0.1f) _moveDir = Vector3.zero;
         }
         if (_playerInput.actions["Dash"].WasPerformedThisFrame())
         {
@@ -105,6 +131,7 @@ public class PlayerController : MonoBehaviour
             TryAttack();
         }
 
+        if (Keyboard.current.tabKey.wasPressedThisFrame) SwapStance();
         UpdateVisuals();
         if (Keyboard.current.kKey.wasPressedThisFrame) OnDie();
     }
@@ -116,7 +143,8 @@ public class PlayerController : MonoBehaviour
     private void Move()
     {
         if (_isDead || _isHit) return;
-        float currentSpeed = playerData.moveSpeed;
+        float speedMultiplier = (currentStance == PlayerStance.Dark) ? 1.2f : 1.0f; 
+        float currentSpeed = playerData.moveSpeed * speedMultiplier;
         if (_isDashing)
         {
             currentSpeed = playerData.dashSpeed;
@@ -126,6 +154,33 @@ public class PlayerController : MonoBehaviour
             currentSpeed = playerData.moveSpeed;
         }
         _rb.MovePosition(_rb.position + _moveDir * currentSpeed * Time.fixedDeltaTime);
+    }
+    public void SwapStance()
+    {
+        if (currentStance == PlayerStance.Light)
+        {
+            currentStance = PlayerStance.Dark;
+        }
+        else currentStance = PlayerStance.Light;
+        ApplyStanceEffect();
+    }
+    void ApplyStanceEffect()
+    {
+        if (_sr != null) return;
+        if (currentStance == PlayerStance.Light)
+        {
+            _sr.color = lightColor;
+        }
+        else _sr.color = darkColor;
+    }
+    public float GetFinalDamage()
+    {
+        float damage = currentDamage;
+        if(currentStance == PlayerStance.Dark)
+        {
+            damage *= 1.5f;
+        }
+        return damage;
     }
     private void TryDash()
     {
@@ -166,9 +221,13 @@ public class PlayerController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         if (_isDead || _isDashing || _isInvincible) return;
-        
-        _currentHP -= damage;
-        Debug.Log($"피격 데미지 {damage} /남은 체력 : {_currentHP}");
+        float finalDamage = damage;
+        if(currentStance == PlayerStance.Light)
+        {
+            finalDamage *= 0.7f;
+        }
+        _currentHP -= finalDamage;
+        Debug.Log($"피격 데미지 {finalDamage}(태세 : {currentStance}) /남은 체력 : {_currentHP}");
         if (UIManager.Instance != null) UIManager.Instance.UpdateHP(_currentHP, currentMaxHP);
         if(_currentHP <= 0)
         {
@@ -190,10 +249,12 @@ public class PlayerController : MonoBehaviour
         _isDashing = false;
         yield return new WaitForSeconds(0.4f);
         _isHit = false;
-        _sr.color = new Color(1, 1, 1, 0.5f);
+        Color invincColor = (currentStance == PlayerStance.Light) ? lightColor : darkColor;
+        invincColor.a = 0.8f;
+        _sr.color = invincColor;
         yield return new WaitForSeconds(0.6f);
-        _sr.color = Color.white;
         _isInvincible = false;
+        ApplyStanceEffect();
     }
     public void OnDie()
     {

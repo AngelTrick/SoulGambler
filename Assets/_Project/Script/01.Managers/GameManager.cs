@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,6 +32,7 @@ public class GameManager : MonoBehaviour
     }
     private void Start()
     {
+        DOTween.SetTweensCapacity(2000, 100);
         isGameOver = false;
         gameTime = 0f;
         Time.timeScale = 1f;

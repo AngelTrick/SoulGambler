@@ -13,7 +13,7 @@ public class Weapon : MonoBehaviour
 
             if (PlayerController.Instance != null)
             {
-                realDamage = PlayerController.Instance.currentDamage;
+                realDamage = PlayerController.Instance.GetFinalDamage();
             }
             else
             {
