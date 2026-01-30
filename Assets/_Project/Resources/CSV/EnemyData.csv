@@ -1,0 +1,5 @@
+ID,Name,Rank,Race,MaxHP,Defense,MoveSpeed,Damage,DetectRange,AttackRange,ExpReward,GoldReward
+3001,Skeleton,Normal,Undead,50,0,2.5,5,10,1.5,10,5
+3002,Zombie,Normal,Undead,100,2,1.5,15,8,1.2,20,10
+3003,OrcWarrior,Epic,Beast,300,5,3,25,12,2,100,50
+3004,LichKing,Boss,Undead,5000,10,2,50,20,8,1000,500

@@ -1,0 +1,6 @@
+ID,JobName,MaxHP,Defense,MoveSpeed,Damage,CritChance,CritDamage,Magnet,Luck
+1001,Knight,150,5,4,10,5,1.5,2,1
+1002,Mage,70,0,4.5,20,10,2,3,1
+1003,Rogue,90,2,6,15,20,2.5,2,1.5
+1004,Archer,80,1,5.5,12,15,1.8,2,1.2
+1005,Priest,120,3,4,8,5,1.5,2,2
