@@ -8,11 +8,17 @@ public class Bullet : MonoBehaviour
     private float _speed;
     private Vector3 _direction;
 
+    private int _pierceCount;
+    private float _knockBack;
+
     public void Init(WeaponDataSO data, float damageMultiplier, Vector3 dir)
     {
         _damage = data.baseDamage * damageMultiplier;
         _speed = data.projectileSpeed;
         _direction = dir.normalized;
+
+        _pierceCount = data.pierce;
+        _knockBack = data.knockback;
 
         if(_direction != Vector3.zero)
         {
@@ -35,9 +41,20 @@ public class Bullet : MonoBehaviour
             if(enemy != null)
             {
                 enemy.TakeDamage(_damage);
+                if(_knockBack > 0)
+                {
+                    enemy.KnockBack(_direction, _knockBack);
+                }
+            }
+            if (_pierceCount > 0)
+            {
+                _pierceCount--;
+            }
+            else 
+            {
+                Despawn();
             }
 
-            Despawn();
         }
     }
     private void Despawn()

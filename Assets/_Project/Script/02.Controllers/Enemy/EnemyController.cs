@@ -23,23 +23,19 @@ public class EnemyController : MonoBehaviour
 
     [HideInInspector] public Transform _target;
 
-    [HideInInspector] public float moveSpeed;
-    [HideInInspector] public float attackRange;
-    [HideInInspector] public float detectRange;
-    [HideInInspector] public float damage;
-    [HideInInspector] public float maxHP;
     private float _currentHP;
     private GameObject _originalPrefab;
     private static readonly int HashHit = Animator.StringToHash("Hit");
     private static readonly int HashDead = Animator.StringToHash("Dead");
+
+    private bool isKnockback = false;
     
 
     public float MoveSpeed => enemyData != null ? enemyData.moveSpeed : 3f;
     public float AttackRange => enemyData != null ? enemyData.attackRange : 1f;
     public float DetectRange => enemyData != null ? enemyData.detectRange : 10f;
     public float Damage => enemyData != null ? enemyData.damage : 10f;
-    
-
+    public float Defense => enemyData != null ? enemyData.defense : 0f;
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
@@ -60,6 +56,8 @@ public class EnemyController : MonoBehaviour
         if (_sr != null) _sr.color = Color.white;
         if (_rb != null) _rb.velocity = Vector3.zero;
 
+        isKnockback = false;
+
         if (PlayerController.Instance != null)
         {
             _target = PlayerController.Instance.transform;
@@ -73,11 +71,29 @@ public class EnemyController : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        if (isKnockback) return;
         StateMachine.currentState.PhysicsUpdate();
+    }
+    public void KnockBack(Vector3 dir, float force)
+    {
+        if (isKnockback || _isDead) return;
+        StartCoroutine(CoKnockBack(dir, force));
+    }
+    private IEnumerator CoKnockBack(Vector3 dir, float force)
+    {
+        isKnockback = true;
+        _rb.velocity = Vector3.zero;
+        _rb.AddForce(dir * force, ForceMode.Impulse);
+
+        yield return new WaitForSeconds(0.2f);
+
+        _rb.velocity = Vector3.zero;
+        isKnockback = false;
     }
     public void TakeDamage(float damage)
     {
-        _currentHP -= damage;
+        float fianlDamage = Mathf.Max(1, damage - Defense);
+        _currentHP -= fianlDamage;
 
         if (_sr != null)
         {
@@ -95,6 +111,7 @@ public class EnemyController : MonoBehaviour
         }
 
     }
+    private bool _isDead = false;
     public void OnDead()
     {
         if (GameManager.Instance != null) GameManager.Instance.AddkillCount();
@@ -117,6 +134,7 @@ public class EnemyController : MonoBehaviour
     }
     private void ReturnToPool()
     {
+        _isDead = false;
         if (PoolManager.instance != null)
         {
             PoolManager.instance.Return(gameObject, _originalPrefab);

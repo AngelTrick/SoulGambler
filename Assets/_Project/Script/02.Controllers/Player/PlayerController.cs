@@ -22,9 +22,9 @@ public class PlayerController : MonoBehaviour
     [HideInInspector] public float currentMoveSpeed;
     [HideInInspector] public float currentDamage;
     [HideInInspector] public float currentAttackCoolDown;
-
-    public int startDiceValue;
-    
+    [HideInInspector] public float currentDefense;
+    [HideInInspector] public float currentCritChance;
+  
     private float _currentHP;
     public float CurrentHP => _currentHP;
     [Header("Combat")]
@@ -57,7 +57,6 @@ public class PlayerController : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _anim = GetComponentInChildren<Animator>();
         _sr = GetComponentInChildren<SpriteRenderer>();
-        _currentHP = playerData.maxHP;
         if (playerData != null)
         {
             InitializeStats();
@@ -87,11 +86,23 @@ public class PlayerController : MonoBehaviour
         currentMoveSpeed = playerData.moveSpeed;
         currentDamage = playerData.damage;
         currentAttackCoolDown = playerData.attackCooldown;
-        _currentHP = currentMaxHP;
-        int bonusDmg = PlayerPrefs.GetInt("BonusDamage", 0);
-        currentDamage = playerData.damage + bonusDmg;
+        currentDefense = playerData.defense;
+        currentCritChance = playerData.critChance;
 
-        Debug.Log($"기본 공격력 : {playerData.damage} +  계약보너스 : {bonusDmg} = 최종 :{currentDamage}");
+        if(DataManager.instance != null && DataManager.instance.currentGameData != null)
+        {
+            GameData data = DataManager.instance.currentGameData;
+            currentDamage += data.attackLevel * 2f ;
+            currentMaxHP += data.healthLevel * 10f;
+            currentMoveSpeed += data.speedLevel * 0.1f;
+            currentDefense += data.defenseLevel * 1f;
+            currentCritChance += data.critChanceLevel * 1f;
+
+            int bonusDmg = PlayerPrefs.GetInt("BonusDamage", 0);
+            currentDamage += bonusDmg;
+        }
+        _currentHP = currentMaxHP;
+        Debug.Log($"기본 공격력 : {currentDamage} HP : {currentMaxHP} , Crit : {currentCritChance}");
         
     }
     private void Update()
@@ -176,6 +187,11 @@ public class PlayerController : MonoBehaviour
     public float GetFinalDamage()
     {
         float damage = currentDamage;
+
+        if(Random.Range(0f,100f)< currentCritChance)
+        {
+            damage *= playerData.critDamage;
+        }
         if(currentStance == PlayerStance.Dark)
         {
             damage *= 1.5f;
@@ -200,11 +216,10 @@ public class PlayerController : MonoBehaviour
         _canDash = true;
         yield return null;
     }
-    private void TryAttack()
+    /*private void TryAttack()
     {
         if (_isAttacking || _isDashing) return;
         StartCoroutine(CoAttack());
-    }
     private IEnumerator CoAttack()
     {
         _isAttacking = true;
@@ -218,10 +233,12 @@ public class PlayerController : MonoBehaviour
         _isAttacking = false;
         yield return null; 
     }
+    }*/
     public void TakeDamage(float damage)
     {
         if (_isDead || _isDashing || _isInvincible) return;
-        float finalDamage = damage;
+        float damageAfterDefense = Mathf.Max(1, damage - currentDefense);
+        float finalDamage = damageAfterDefense;
         if(currentStance == PlayerStance.Light)
         {
             finalDamage *= 0.7f;
@@ -303,5 +320,17 @@ public class PlayerController : MonoBehaviour
     {
         _currentHP = currentMaxHP;
         Debug.Log("플레이어 체력 완전 회복");
+    }
+
+    public float GetFinalMagnetRange()
+    {
+        float range = playerData.magnet;
+
+        if(DataManager.instance != null && DataManager.instance.currentGameData != null)
+        {
+            range += DataManager.instance.currentGameData.magnetLevel * 0.5f;
+        }
+        //range += itemBonusRange;
+        return range;
     }
 }
