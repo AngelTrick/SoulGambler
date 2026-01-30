@@ -1,0 +1,6 @@
+ID,Name,Type,Grade,Damage,AtkSpeed,Range,ProjSpeed,Amount,Pierce,Knockback,Desc
+2001,IronSword,Melee,Normal,15,1,2.5,0,1,0,2,기사의 기본 검
+2002,FireStaff,Ranged,Normal,25,0.8,8,10,1,0,0.5,마법사의 지팡이
+2003,Dagger,Melee,Normal,10,2.5,1.5,0,1,0,0.2,로그의 단검
+2004,WoodenBow,Ranged,Normal,12,1.8,10,15,1,1,0.5,궁수의 활
+2005,HolyMace,Melee,Rare,20,0.6,2,0,1,0,3,성직자의 메이스

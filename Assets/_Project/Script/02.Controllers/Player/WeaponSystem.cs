@@ -20,7 +20,7 @@ public class WeaponSystem : MonoBehaviour
     private PlayerInput _playerInput;
     private bool _isFiringPressed = false;
 
-    private bool _isAttacking = false;
+    
 
     private void Awake()
     {
@@ -150,7 +150,7 @@ public class WeaponSystem : MonoBehaviour
 
     IEnumerator FireMelee()
     {
-        _isAttacking = true;
+        bool _isAttacking = true;
         if (weaponHitbox != null)
         {
             weaponHitbox.SetActive(true);

@@ -2,21 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum WeaponType { Ranged, Melee}
+public enum WeaponType {Ranged, Melee}
+public enum ItemGrade {Normal, Rare, Epic , Legendary }
 [CreateAssetMenu(fileName = "NewWeapon",menuName = "SO/Weapon")]
 public class WeaponDataSO : ScriptableObject
 {
-    [Header("Info")]
+    [Header("Basic Info")]
     public string weaponName;
     public WeaponType weaponType;
-    [TextArea] public string descrption;
+    public ItemGrade grade; 
+    [TextArea] public string description;
     public Sprite icon;
 
-    [Header("Stats")]
+    [Header("Base Stats")]
     public float baseDamage;
     public float attackSpeed;
     public float range;
     public float projectileSpeed;
+
+    [Header("RPG Stat")]
+    public int amount = 1;
+    public int pierce = 0;
+    public float knockback = 0f;
 
     [Header("Prefab")]
     public GameObject projectilePrefab;

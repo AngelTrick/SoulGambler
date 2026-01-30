@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ExpGem : MonoBehaviour
@@ -10,6 +11,8 @@ public class ExpGem : MonoBehaviour
     private Transform _targetPlayer;
     private bool isMagnet = false;
     private float _magnetSpeed = 15f;
+
+    private float _defaultMagnetRange = 2.0f;
     public void Initialize(Transform player)
     {
         _targetPlayer = player;
@@ -17,7 +20,10 @@ public class ExpGem : MonoBehaviour
     }
     private void OnEnable()
     {
-        Initialize(null);
+        if(PlayerController.Instance != null)
+        {
+            Initialize(PlayerController.Instance.transform);
+        }
         isMagnet = false;
     }
     private void Update()
@@ -28,7 +34,19 @@ public class ExpGem : MonoBehaviour
         {
             transform.position = Vector3.MoveTowards(transform.position, _targetPlayer.position, _magnetSpeed * Time.deltaTime);
         }
-        else if (Vector3.Distance(transform.position, _targetPlayer.position) < 3f) { isMagnet = true; }
+        else
+        {
+            float detectRange = _defaultMagnetRange;
+
+            if(PlayerController.Instance != null )
+            {
+                detectRange = PlayerController.Instance.GetFinalMagnetRange();
+            }
+            if (Vector3.Distance(transform.position, _targetPlayer.position) < detectRange)
+            {
+                isMagnet = true ;
+            }
+        } 
     }
     private void OnTriggerEnter(Collider other)
     {
