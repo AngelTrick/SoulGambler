@@ -1,86 +1,87 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using DG.Tweening;
-
-
+using TMPro;
+using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class ContractSystem : MonoBehaviour
 {
+	[Header("Data")]
+	public List<ContractDataSO> allContracts;
+	public ContractDataSO _currentSelectedContract;
+
 	[Header("UI")]
 	public GameObject contractPanel;
-	public GameObject dicePanel;
-	public TMP_InputField nameInput;
-	public TextMeshProUGUI diceResultText;
-	public TextMeshProUGUI totalGoldText;
-	[Header("주사위 연출")]
-	public Image diceImage;
-	public Sprite[] diceSprites;
-	private void Start()
+	public TextMeshProUGUI titleText;
+	public TextMeshProUGUI descText;
+	public Image contractIcon;
+
+    private void Start()
+    {
+		ShowRandomContract();
+    }
+	public void ShowRandomContract()
 	{
-		if (DataManager.instance != null && totalGoldText != null)
+		if (allContracts.Count == 0) return;
+		int randomIndex = Random.Range(0, allContracts.Count);
+		_currentSelectedContract = allContracts[randomIndex];
+
+		UpdataUI();
+	}
+	void UpdataUI()
+	{
+		if (_currentSelectedContract == null) return;
+
+		titleText.text = _currentSelectedContract.contractName;
+		descText.text = _currentSelectedContract.description;
+		if(_currentSelectedContract.icon != null)
 		{
-			int gold = DataManager.instance.currentGameData.totalGold;
-			totalGoldText.text = $"TOTAL GOLD : {gold:N0}";
+			contractIcon.sprite = _currentSelectedContract.icon;
 		}
 	}
-
-	public void OnClickExit()
+	public void OnAcceptContract()
 	{
-		Application.Quit();
+		ApplyContractEffect(_currentSelectedContract);
+		StartGame();
 	}
-	public void OnSignContract()
+	public void OnRefuseContract()
 	{
-		string nickName = nameInput.text;
-		if (string.IsNullOrEmpty(nickName)) return;
-		PlayerPrefs.SetString("PlayerName", nickName);
-
-		if(DataManager.instance != null)
-		{
-			DataManager.instance.currentGameData.playerName = nickName;
-		}
-		StartCoroutine(RollDiceAndStart());
+		Debug.Log("계약 거절 : 기본 상태로 시작합니다.");
+		StartGame();
 	}
-	IEnumerator RollDiceAndStart()
+	void ApplyContractEffect(ContractDataSO contract)
 	{
-		if (contractPanel != null) contractPanel.SetActive(false);
-		if (dicePanel != null) dicePanel.SetActive(true);
+		if (contract == null) return;
+		ApplyStatChange(contract.costStat, -contract.costValue);
 
-		if(diceResultText != null) diceResultText.text = "";
-
-		diceImage.transform.DOShakePosition(2.0f, 30f, 20, 90, false, true);
-		float duration = 2.0f;
-		float timer = 0f;
-
-		while(timer < duration)
+		switch (contract.type)
 		{
-			timer += Time.deltaTime;
-			int randomIndex = Random.Range(0, 6);
-			diceImage.sprite = diceSprites[randomIndex];
-
-			yield return new WaitForSeconds(0.05f);
+			case ContractType.StatTrade:
+				ApplyStatChange(contract.rewardStat, contract.rewardValue);
+				break;
+			case ContractType.GoldGrant:
+				if(DataManager.instance != null)
+				{
+					DataManager.instance.currentGameData.totalGold += contract.rewardGold;
+				}
+				break;
 		}
-		int finalDiceValue = Random.Range(1, 7);
-		diceImage.sprite = diceSprites[finalDiceValue - 1];
-		if (diceResultText != null)
-		{
-			diceResultText.text = $"<color=red>ATK +{finalDiceValue}</color>";
-			diceResultText.transform.localScale = Vector3.zero;
-			diceResultText.transform.DOScale(1.2f, 0.3f).SetEase(Ease.OutBack);
-		}
+		Debug.Log($"계약 성립 :{contract.contractName} 적용 완료");
+	}
+	void ApplyStatChange(StatType stat, float value)
+	{
+		string key = "Bonus_" + stat.ToString();
+		float currentValue = PlayerPrefs.GetFloat(key, 0f);
+		PlayerPrefs.SetFloat(key, currentValue + value);
 
-		// 4. 보너스 저장 (우체통에 넣기)
-		PlayerPrefs.SetInt("BonusDamage", finalDiceValue);
-		PlayerPrefs.Save();
-
-		Debug.Log($"[계약 성립] 이름: {nameInput.text} / 보너스: {finalDiceValue}");
-
-		yield return new WaitForSeconds(3f);
-
-		// 5. 게임 씬으로 출발!
+		Debug.Log($"스텟 변경 : {stat} {value} (누적: {currentValue + value})");
+	}
+	void StartGame()
+	{
 		SceneManager.LoadScene("GameScene");
 	}
+
+	
 }
