@@ -121619,8 +121619,14 @@ MonoBehaviour:
     bestSurvivalTime: 0
     unlockWeaponIds:
     - NoviceWand
-    attackDamageLevel: 0
-    moveSpeedLevel: 0
+    unlockCharacterIds:
+    - Knight
+    attackLevel: 0
+    healthLevel: 0
+    speedLevel: 0
+    defenseLevel: 0
+    critChanceLevel: 0
+    magnetLevel: 0
   currentStageGold: 0
 --- !u!1 &544232168
 GameObject:
@@ -121989,6 +121995,7 @@ MonoBehaviour:
   gameOverPanel: {fileID: 677036977}
   levelUpPanel: {fileID: 1640792058}
   levelUpCanvasGroup: {fileID: 1640792062}
+  rewardButtons: []
 --- !u!1 &677036977
 GameObject:
   m_ObjectHideFlags: 0
@@ -122121,6 +122128,8 @@ MonoBehaviour:
   expGemPrefab: {fileID: 1854519353482990110, guid: f8b254d5e85980d4bb35c8f2d65a67da,
     type: 3}
   player: {fileID: 2107021584}
+  loseGoldOnDeath: 1
+  goldKeepRatio: 0
 --- !u!114 &751028226
 MonoBehaviour:
   m_ObjectHideFlags: 0
