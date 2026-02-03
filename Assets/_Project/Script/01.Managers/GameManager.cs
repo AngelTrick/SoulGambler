@@ -22,6 +22,11 @@ public class GameManager : MonoBehaviour
 
     public PlayerController player;
 
+    [Header("Rouguelike Settings")]
+    public bool loseGoldOnDeath = true;
+    public float goldKeepRatio = 0f;
+
+
     private void Awake()
     {
         if (Instance == null)
@@ -68,6 +73,11 @@ public class GameManager : MonoBehaviour
         level++;
         currentExp = 0;
         maxExp += 50;
+        if(LevelUpManager.Instance != null)
+        {
+            List<RewardOption> rewards = LevelUpManager.Instance.GetRandomRewards();
+        }
+
         if(UIManager.Instance != null)
         {
             UIManager.Instance.UpdateLevel(level);
@@ -79,27 +89,17 @@ public class GameManager : MonoBehaviour
     public void SelectAugment(int type)
     {
         if (player == null) return;
-        switch (type)
+        if(LevelUpManager.Instance != null)
         {
-            case 1:
-                player.currentDamage += 5;
-                Debug.Log($"공증 : 현재 공격력 {player.currentDamage}");
-                break;
-            case 2:
-                player.currentMoveSpeed += 1f;
-                Debug.Log($"이속 증 : 현재 이속 {player.currentMoveSpeed}");
-                break;
-            case 3:
-                player.FullRecovery();
-                if(UIManager.Instance != null)
-                {
-                    UIManager.Instance.UpdateHP(player.CurrentHP, player.playerData.maxHP);
-                }
-                break;
+            LevelUpManager.Instance.SelectRewardByIndex(type - 1);
         }
-        if(UIManager.Instance != null)
-            UIManager.Instance.ShowLevelUpUI(false);
-        Time.timeScale = 1f;
+        else
+        {
+            Debug.LogError("LevelUpManager가 없습니다.");
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowLevelUpUI(false);
+            Time.timeScale = 1f;
+        }
     }
     public void AddkillCount()
     {

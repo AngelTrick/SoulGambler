@@ -333,4 +333,50 @@ public class PlayerController : MonoBehaviour
         //range += itemBonusRange;
         return range;
     }
+    //========================================================
+    // [New] 레벨업 보상 적용 함수 (LevelUpManager에서 호출)
+    //========================================================
+    public void ApplyReward(RewardOption reward)
+    {
+        switch (reward.type)
+        {
+            case RewardType.StatUp:
+                ApplyStatReward(reward.statType, reward.statValue);
+                break;
+            case RewardType.NewWeapon:
+            case RewardType.UpgradeWeapon:
+                ApplyWeaponReward(reward.weaponData);
+                break;
+        }
+    }
+    void ApplyStatReward(StatType statType, float value)
+    {
+        switch (statType) 
+        {
+            case StatType.MaxHP:
+                currentMaxHP += value;
+                _currentHP += value;
+                if (UIManager.Instance != null) UIManager.Instance.UpdateHP(_currentHP, currentMaxHP);
+                break;
+            case StatType.Damage:
+                currentDamage += value;
+                break;
+            case StatType.MoveSpeed:
+                currentMoveSpeed += value;
+                break;
+            case StatType.Defense:
+                currentDefense += value;
+                break;
+            case StatType.CritChance:
+                currentCritChance += value;
+                break;
+        }
+        Debug.Log($"[Reward] 스탯 강화 : Type {statType}, Value {value}");
+    }
+    void ApplyWeaponReward(WeaponDataSO weaponData)
+    {
+        WeaponSystem waeponSys = GetComponent<WeaponSystem>();
+        currentDamage += 2f;
+        Debug.Log($"[Reward] 무기 강화 완료 {weaponData.weaponName}(공격력 증가)");
+    }
 }
