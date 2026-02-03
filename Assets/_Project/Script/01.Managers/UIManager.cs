@@ -24,6 +24,9 @@ public class UIManager : MonoBehaviour
     public GameObject levelUpPanel;
 
     public CanvasGroup levelUpCanvasGroup;
+    [Header("Level Up Rewards")]
+    public RewardUI[] rewardButtons;
+
 
     public void Awake()
     {
@@ -90,6 +93,8 @@ public class UIManager : MonoBehaviour
         levelUpPanel.SetActive(show);
         if (show)
         {
+            RefreshRewardUI();
+
             if(levelUpCanvasGroup != null)
             {
                 levelUpCanvasGroup.interactable = false;
@@ -99,6 +104,31 @@ public class UIManager : MonoBehaviour
                 StartCoroutine(CoUnlockLevelUp());
             }
         }
+    }
+    void RefreshRewardUI()
+    {
+        if (LevelUpManager.Instance == null) return;
+        List<RewardOption> rewards = LevelUpManager.Instance.currentRewards;
+
+        if (rewards == null || rewards.Count == 0) return;
+
+        for(int i= 0 ; i < rewardButtons.Length; i++)
+        {
+            if(i < rewards.Count)
+            {
+                rewardButtons[i].gameObject.SetActive(true);
+                rewardButtons[i].Init(i, rewards[i]);
+            }
+            else
+            {
+                rewardButtons[i].gameObject.SetActive(false);
+            }
+        }
+    }
+    public void CloseLevelUpUI()
+    {
+        ShowLevelUpUI(false);
+        Time.timeScale = 1f;
     }
     IEnumerator CoUnlockLevelUp()
     {
