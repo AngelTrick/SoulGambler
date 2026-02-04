@@ -109,3 +109,4 @@ AllScripts.txt
 #(경로 무시 하고 싶을 땐 위에 주소를 변경 해서 주석 해제 / 파일 자체 만 무시 할 시 아래)
 ScriptMerger.cs
 ScriptMerger.cs.meta
+*.json
