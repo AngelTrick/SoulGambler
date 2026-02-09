@@ -51,6 +51,10 @@ public class GameManager : MonoBehaviour
             UIManager.Instance.ShowLevelUpUI(false);
             UIManager.Instance.UpdateKillCount(0);
         }
+        if(PlayerController.Instance != null)
+        {
+            PlayerController.Instance.OnPlayerDie += OnGameOver;
+        }
     }
     private void Update()
     {
@@ -60,6 +64,13 @@ public class GameManager : MonoBehaviour
         {
             UIManager.Instance.UpdateHP(player.CurrentHP, player.playerData.maxHP);
             UIManager.Instance.UpdateTimer(gameTime);
+        }
+    }
+    private void OnDisable()
+    {
+        if(PlayerController.Instance != null)
+        {
+            PlayerController.Instance.OnPlayerDie -= OnGameOver;
         }
     }
     public void GetExp(int amount)
@@ -111,7 +122,7 @@ public class GameManager : MonoBehaviour
     {
         if (isGameOver) return;
         isGameOver = true;
-        DataManager.instance.SaveGame();
+        DataManager.Instance.SaveGame();
         UIManager.Instance.ShowGameOver();
     }
     public void RetryGame()
