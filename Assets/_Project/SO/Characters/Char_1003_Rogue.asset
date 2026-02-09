@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2a72a323466acc4989eb33f699faad4, type: 3}
   m_Name: Char_1003_Rogue
   m_EditorClassIdentifier: 
-  jobName: Rogue
-  maxHP: 90
-  defense: 2
-  moveSpeed: 6
-  damage: 15
-  critChance: 20
-  critDamage: 2.5
+  jobName: 
+  maxHP: 100
+  defense: 0
+  moveSpeed: 5
+  damage: 10
+  critChance: 5
+  critDamage: 1.5
   magnet: 2
-  luck: 1.5
+  luck: 1
   dashDuration: 0.2
   dashCooldown: 2
   attackCooldown: 0.5
