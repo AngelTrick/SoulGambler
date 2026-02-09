@@ -17,28 +17,48 @@ public class ContractSystem : MonoBehaviour
 	public TextMeshProUGUI titleText;
 	public TextMeshProUGUI descText;
 	public Image contractIcon;
+	public TextMeshProUGUI totalGoldText;
 
+	public void Init()
+	{
+		UpdateTotalGoldUI();
+        ShowRandomContract();
+	}
     private void Start()
     {
-		ShowRandomContract();
+		Init();
     }
+
+	void UpdateTotalGoldUI()
+	{
+		if(DataManager.Instance != null && totalGoldText != null)
+		{
+			int gold = DataManager.Instance.TotalGold;
+			totalGoldText.text = $"Total Gold : {gold: NO}";
+		}
+	}
 	public void ShowRandomContract()
 	{
 		if (allContracts.Count == 0) return;
 		int randomIndex = Random.Range(0, allContracts.Count);
 		_currentSelectedContract = allContracts[randomIndex];
 
-		UpdataUI();
+		UpdateUI();
 	}
-	void UpdataUI()
+	void UpdateUI()
 	{
 		if (_currentSelectedContract == null) return;
 
-		titleText.text = _currentSelectedContract.contractName;
-		descText.text = _currentSelectedContract.description;
+		if(titleText != null) titleText.text = _currentSelectedContract.contractName;
+		if(descText != null) descText.text = _currentSelectedContract.description;
 		if(_currentSelectedContract.icon != null)
 		{
 			contractIcon.sprite = _currentSelectedContract.icon;
+			contractIcon.gameObject.SetActive(true);
+		}
+		else
+		{
+			contractIcon.gameObject.SetActive(false);
 		}
 	}
 	public void OnAcceptContract()
@@ -62,9 +82,9 @@ public class ContractSystem : MonoBehaviour
 				ApplyStatChange(contract.rewardStat, contract.rewardValue);
 				break;
 			case ContractType.GoldGrant:
-				if(DataManager.instance != null)
+				if(DataManager.Instance != null)
 				{
-					DataManager.instance.currentGameData.totalGold += contract.rewardGold;
+					DataManager.Instance.AddGold(contract.rewardGold);
 				}
 				break;
 		}
@@ -72,11 +92,13 @@ public class ContractSystem : MonoBehaviour
 	}
 	void ApplyStatChange(StatType stat, float value)
 	{
-		string key = "Bonus_" + stat.ToString();
-		float currentValue = PlayerPrefs.GetFloat(key, 0f);
-		PlayerPrefs.SetFloat(key, currentValue + value);
+		if(DataManager.Instance != null && DataManager.Instance.currentGameData != null)
+		{
+			DataManager.Instance.currentGameData.AddContractBonusValue(stat, value);
+			DataManager.Instance.SaveGame();
+		}
 
-		Debug.Log($"스텟 변경 : {stat} {value} (누적: {currentValue + value})");
+		Debug.Log($"스텟 변경 : {stat} {value} (통합 저장 완)");
 	}
 	void StartGame()
 	{

@@ -2,31 +2,60 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System.Text;
 using JetBrains.Annotations;
 using UnityEngine.UIElements;
 using UnityEngine.Rendering.Universal;
+using UnityEditor.ShaderGraph.Drawing.Inspector.PropertyDrawers;
 public class DataManager : MonoBehaviour
 {
-    public static DataManager instance;
+    private static DataManager _instance;
+    public static DataManager Instance
+    {
+        get
+        {
+            if(_instance == null)
+            {
+                _instance = FindObjectOfType<DataManager>();
+                if (_instance == null)
+                {
+                    GameObject go = new GameObject("DataManger");
+                    _instance = go.AddComponent<DataManager>();
+                }
+            }
+            return _instance;
+        }
+    }
 
     public GameData currentGameData;
-
     private string _savePath;
-
     public int currentStageGold = 0;
+    //캡슐화된 프로퍼티 (외부 읽기 전용)
+    public int TotalGold
+    {
+        get => currentGameData != null ? currentGameData.totalGold : 0;
+    }
+    private readonly string _encryptionKey = "SoulGamblerSecretKey";
     private void Awake()
     {
-        if(instance == null)
+        if(_instance == null)
         {
-            instance = this;
+            _instance = this;
             DontDestroyOnLoad(gameObject);
-
             _savePath = Path.Combine(Application.persistentDataPath, "savefile.json");
             LoadGame();
         }
         else
         {
             Destroy(gameObject);
+        }
+    }
+    public void AddGold(int amount)
+    {
+        if(currentGameData != null)
+        {
+            currentGameData.totalGold += amount;
+            SaveGame();
         }
     }
     public void AddStageGold(int amount)
@@ -36,13 +65,14 @@ public class DataManager : MonoBehaviour
     
     public void SaveGame()
     {
+        if (currentGameData == null) currentGameData = new GameData();
         currentGameData.totalGold += currentStageGold;
         currentStageGold = 0;
-
         string json = JsonUtility.ToJson(currentGameData,true);
-        File.WriteAllText(_savePath, json);
+        string encryptedJson = EncryptDecrypt(json);
+        File.WriteAllText(_savePath, encryptedJson);
 
-        Debug.Log($"게임 저장 완료 : 경로 {_savePath}\n {json}");
+        Debug.Log($"게임 저장 완료 (암호화됨) {_savePath}");
     
     }
     public void LoadGame()
@@ -56,7 +86,8 @@ public class DataManager : MonoBehaviour
         }
         try
         {
-            string json = File.ReadAllText(_savePath);
+            string encryptedJson = File.ReadAllText(_savePath);
+            string json = EncryptDecrypt(encryptedJson);
             currentGameData = JsonUtility.FromJson<GameData>(json);
             Debug.Log($"게임 로드 완료 : 골드 : {currentGameData.totalGold}");
         }
@@ -67,6 +98,16 @@ public class DataManager : MonoBehaviour
         }
     }
 
+
+    private string EncryptDecrypt(string data)
+    {
+        StringBuilder modifiedData = new StringBuilder();
+        for(int i =0; i < data.Length; i++)
+        {
+            modifiedData.Append((char)(data[i] ^ _encryptionKey[i % _encryptionKey.Length]));
+        }
+        return modifiedData.ToString();
+    }
     public void ResetData()
     {
         currentGameData = new GameData();
