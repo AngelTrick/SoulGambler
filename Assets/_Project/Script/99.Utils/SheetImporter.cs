@@ -1,97 +1,96 @@
 // ==========================================
 // FILE NAME: SheetImporter.cs
-// 설명: 구글 시트 CSV 파서 (안전 장치 및 CSV 포맷 자동 매칭 적용)
+// 설명: 구글 시트 데이터 연동 툴 (Final Fixed Ver)
+// 기능: One-Key Sync, 스마트 업데이트, 자동 연결, 특수문자/따옴표 제거 파싱
 // ==========================================
 
-using System.IO;
+using System.Collections;
+using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
+using UnityEditor;
+using System.IO;
 using UnityEngine.Networking;
 using System.Threading.Tasks;
 
 public class SheetImporter : EditorWindow
 {
-    private string _charUrl = "";
-    private string _weaponUrl = "";
-    private string _enemyUrl = "";
-    private string _rewardUrl = "";
+    private string _spreadsheetId = "";
 
-    private const string KEY_CHAR = "Sheet_Char_URL";
-    private const string KEY_WEAPON = "Sheet_Weapon_URL";
-    private const string KEY_ENEMY = "Sheet_Enemy_URL";
-    private const string KEY_REWARD = "Sheet_Reward_URL";
+    private const string SHEET_NAME_CHAR = "Characters";
+    private const string SHEET_NAME_WEAPON = "Weapons";
+    private const string SHEET_NAME_ENEMY = "Enemies";
+    private const string SHEET_NAME_REWARD = "Rewards";
+
+    private const string KEY_ID = "Sheet_Spreadsheet_ID";
 
 
-    [MenuItem("Tools/Data Importer")]
+    [MenuItem("Tools/Google Sheet Importer(One-Key)")]
     public static void ShowWindow()
     {
-        GetWindow<SheetImporter>("Data Importer");
+        GetWindow<SheetImporter>("Sheet Importer");
     }
 
     private void OnEnable()
     {
-        _charUrl = EditorPrefs.GetString(KEY_CHAR, "");
-        _weaponUrl = EditorPrefs.GetString(KEY_WEAPON, "");
-        _enemyUrl = EditorPrefs.GetString(KEY_ENEMY, "");
-        _rewardUrl = EditorPrefs.GetString(KEY_REWARD, "");
+        _spreadsheetId = EditorPrefs.GetString(KEY_ID,"");
     }
 
     private void OnDisable()
     {
-        EditorPrefs.SetString(KEY_CHAR, _charUrl);
-        EditorPrefs.SetString(KEY_WEAPON, _weaponUrl);
-        EditorPrefs.SetString(KEY_ENEMY, _enemyUrl);
-        EditorPrefs.SetString(KEY_REWARD, _rewardUrl);
+        EditorPrefs.SetString(KEY_ID, _spreadsheetId);
     }
 
     void OnGUI()
     {
-        GUILayout.Label("Google Sheet Live Sync Tool (Final Ver)", EditorStyles.boldLabel);
+        GUILayout.Label("Google Sheet One-Key Sync Tool (Final Ver)", EditorStyles.boldLabel);
         EditorGUILayout.Space();
-        GUILayout.Label("CSV Publish URLs (File > Share > Publish to web > CSV)", EditorStyles.miniLabel);
+        GUILayout.Label("1. 구글 시트 우측 상단 [공유] -> [링크가 있는 모든 사용자] 설정", EditorStyles.helpBox);
+        GUILayout.Label("2. 브라우저 주소창의 '/d/' 와 '/edit' 사이의 ID만 복사하세요.", EditorStyles.miniLabel);
+        GUILayout.Label("3. 기존 파일 업데이트 (중복 생성 방지)", EditorStyles.miniLabel);
+        GUILayout.Label("4. LevelUpManager 자동 연결 기능 포함", EditorStyles.miniLabel);
         EditorGUILayout.Space();
-        _charUrl = EditorGUILayout.TextField("Character URL", _charUrl);
-        _weaponUrl = EditorGUILayout.TextField("Weapon URL", _weaponUrl);
-        _enemyUrl = EditorGUILayout.TextField("Enemy URL", _enemyUrl);
-        _rewardUrl = EditorGUILayout.TextField("Reward URL", _rewardUrl);
+
+        _spreadsheetId = EditorGUILayout.TextField("Spreadsheet ID", _spreadsheetId);
 
         EditorGUILayout.Space();
 
-        if (GUILayout.Button("Sync All Data (Download & Update)", GUILayout.Height(40)))
+        if (GUILayout.Button("Sync All Data", GUILayout.Height(40)))
         {
+            if (string.IsNullOrEmpty(_spreadsheetId))
+            {
+                Debug.LogError("Spreadsheet ID를 입력해주세요");
+                return;
+            }
             SyncData();
         }
     }
     async void SyncData()
     {
+        Debug.Log("데이터 동기화 시작");
         //1. Character
-        if (!string.IsNullOrEmpty(_charUrl))
-        {
-            string data = await DownloadCSV(_charUrl);
-            if (data != null) ImportCharacters(data);
-        }
+        string charData = await DownloadCSV(GetDownloadUrl(SHEET_NAME_CHAR));
+        if (charData != null) ImportCharacters(charData);
         //2. Weapon
-        if (!string.IsNullOrEmpty(_weaponUrl))
-        {
-            string data = await DownloadCSV(_weaponUrl);
-            if (data != null) ImportWeapons(data);
-        }
+        string weaponData = await DownloadCSV(GetDownloadUrl(SHEET_NAME_WEAPON));
+        if (weaponData != null) ImportWeapons(weaponData);
         //3. Enemy
-        if (!string.IsNullOrEmpty(_enemyUrl))
-        {
-            string data = await DownloadCSV(_enemyUrl);
-            if (data != null) ImportEnemies(data);
-        }
+        string enemyData = await DownloadCSV(GetDownloadUrl(SHEET_NAME_ENEMY));
+        if (enemyData != null) ImportEnemies(enemyData);
         //4. Reward
-        if (!string.IsNullOrEmpty(_rewardUrl))
+        string rewardData = await DownloadCSV(GetDownloadUrl(SHEET_NAME_REWARD));
+        if (rewardData != null)
         {
-            string data = await DownloadCSV(_rewardUrl);
-            if (data != null) ImportRewards(data);
+            ImportRewards(rewardData);
+            AutoLinkRewardsToManager();
         }
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log($"<color=cyan>모든 데이터 동기화 및 갱신 완료!</color>");
+    }
+    string GetDownloadUrl(string sheetName)
+    {
+        return $"https://docs.google.com/spreadsheets/d/{_spreadsheetId}/gviz/tq?tqx=out:csv&sheet={sheetName}";
     }
     async Task<string> DownloadCSV(string url)
     {
@@ -133,9 +132,10 @@ public class SheetImporter : EditorWindow
 
             string id = ParseString(row, 0);
             string name = ParseString(row, 1);
-            string fileName = $"Char_{id}_{name}.asset";
+            
+            string fileName = $"Char_{SanitizeFileName(id)} _ {SanitizeFileName(name)}.asset";
 
-            PlayerDataSO data = GetOrCreateSO<PlayerDataSO>(savePath, fileName);
+            PlayerDataSO data = FindAndRenameSO<PlayerDataSO>(savePath, id, fileName, "Char_");
 
             data.jobName = name;
             data.maxHP = ParseFloat(row, 2);
@@ -169,9 +169,10 @@ public class SheetImporter : EditorWindow
 
             string id = ParseString(row, 0);
             string name = ParseString(row, 1);
-            string fileName = $"Weapon_{id}_{name}.asset";
+            
+            string fileName = $"Weapon_{SanitizeFileName(id)}_{SanitizeFileName(name)}.asset";
 
-            WeaponDataSO data = GetOrCreateSO<WeaponDataSO>(savePath, fileName);
+            WeaponDataSO data = FindAndRenameSO<WeaponDataSO>(savePath, id, fileName, "Weapon_");
 
             data.weaponName = name;
 
@@ -221,9 +222,10 @@ public class SheetImporter : EditorWindow
 
             string id = ParseString(row, 0);
             string name = ParseString(row, 1);
-            string fileName = $"Enemy_{id}_{name}.asset";
+           
+            string fileName = $"Enemy_{SanitizeFileName(id)}_{SanitizeFileName(name)}.asset";
 
-            EnemyDataSO data = GetOrCreateSO<EnemyDataSO>(savePath, fileName);
+            EnemyDataSO data = FindAndRenameSO<EnemyDataSO>(savePath, id, fileName, "Enemy_");
 
             data.enemyName = name;
 
@@ -265,10 +267,10 @@ public class SheetImporter : EditorWindow
 
             string id = ParseString(row, 0);
             string title = ParseString(row, 1);
-            string safeTitle =title.Replace(" ", "_");
-            string fileName = $"Reward_{id}.asset";
+            string safeTitle =SanitizeFileName(title.Replace(" ", "_"));
+            string FileName = $"Reward_{SanitizeFileName(id)}_{safeTitle}.asset";
 
-            LevelUpRewardSO data = GetOrCreateSO<LevelUpRewardSO>(savePath, fileName);
+            LevelUpRewardSO data = FindAndRenameSO<LevelUpRewardSO>(savePath, id, FileName, "Reward_");
 
             data.title = title;
             data.description = ParseString(row,2);
@@ -285,30 +287,44 @@ public class SheetImporter : EditorWindow
                 data.statType = sType;
                 data.weaponType = WeaponUpgradeType.None;
             }
-            else
+            else 
             {
-                Debug.LogWarning($"[Reward] 알 수 없는 타입입니다. {typeStr} (ID : {id}");
+                Debug.LogWarning($"[Reward] 알수 없는 타입: {typeStr}(ID :{id}");
             }
+            EditorUtility.SetDirty(data);
 
         }
-        Debug.Log("보상(Reward) 데이터 갱신 완료 (무기 / 스탯 자동 분류");
+        Debug.Log("보상(Reward) 데이터 갱신 완료 (무기 / 스탯 자동 분류)");
     }
     // ---------------------------------------------------------
     // [헬퍼 함수] 안전한 파싱 (데이터가 없거나 에러나면 기본값 리턴)
     // ---------------------------------------------------------
 
+    string SanitizeFileName(string name)
+    {
+        string invalidChars = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidFileNameChars());
+        foreach(char c in invalidChars)
+        {
+            name = name.Replace(c.ToString(), "");
+        }
+        return name.Replace("\"", "").Trim();
+
+    }
     // 문자열 읽기 (없으면 빈 문자열)
     string ParseString(string[] row, int index, string defaultValue = "")
     {
         if (index >= row.Length) return defaultValue;
-        return row[index].Trim();
+        string value = row[index].Trim();
+        return value = value.Replace("\"", ""); ;
     }
 
     // 실수 읽기 (없으면 0)
     float ParseFloat(string[] row, int index, float defaultValue = 0f)
     {
         if (index >= row.Length) return defaultValue;
-        if (float.TryParse(row[index].Trim(), out float result)) return result;
+        string value = row[index].Trim();
+        value = value.Replace("\"", "");
+        if (float.TryParse(value, out float result)) return result;
         return defaultValue;
     }
 
@@ -316,34 +332,90 @@ public class SheetImporter : EditorWindow
     int ParseInt(string[] row, int index, int defaultValue = 0)
     {
         if (index >= row.Length) return defaultValue;
-        if (int.TryParse(row[index].Trim(), out int result)) return result;
+        string value = row[index].Trim();
+        value = value.Replace("\"", "");
+        if (int.TryParse(value, out int result)) return result;
         return defaultValue;
     }
 
     // SO 파일 생성 또는 로드 (연결 유지)
-    T GetOrCreateSO<T>(string savePath, string fileName) where T : ScriptableObject
+    T FindAndRenameSO<T>(string savePath, string idStr, string newFileName, string prefix) where T : ScriptableObject
     {
-        // 파일명에 사용할 수 없는 문자 제거
-        foreach (char c in Path.GetInvalidFileNameChars())
+        string fullNewPath = $"{savePath}/{newFileName}";
+
+        // 1. 이미 정확한 이름의 파일이 있는지 확인
+        T data = AssetDatabase.LoadAssetAtPath<T>(fullNewPath);
+        if (data != null) return data;
+
+        // 2. 없다면, 같은 폴더에서 "{Prefix}{ID}_" 로 시작하는 파일이 있는지 검색
+        // 예: "Reward_4001_OldName.asset" 을 찾음
+        string[] guids = AssetDatabase.FindAssets($"t:{typeof(T).Name}", new[] { savePath });
+        foreach (string guid in guids)
         {
-            fileName = fileName.Replace(c, '_');
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            string fileName = Path.GetFileName(path);
+
+            // 파일명이 접두사+ID로 시작하는지 체크 (예: Reward_4001_)
+            if (fileName.StartsWith($"{prefix}{idStr}_"))
+            {
+                // 찾았다! 이름이 다르다면 리네임 실행
+                AssetDatabase.RenameAsset(path, Path.GetFileNameWithoutExtension(newFileName));
+                AssetDatabase.SaveAssets();
+
+                // 리네임된 에셋을 로드해서 반환
+                return AssetDatabase.LoadAssetAtPath<T>(fullNewPath);
+            }
         }
 
-        string fullPath = $"{savePath}/{fileName}";
-        T data = AssetDatabase.LoadAssetAtPath<T>(fullPath);
-        if (data == null)
-        {
-            data = ScriptableObject.CreateInstance<T>();
-            AssetDatabase.CreateAsset(data, fullPath);
-        }
-        EditorUtility.SetDirty(data);
+        // 3. 진짜 없으면 새로 생성
+        data = ScriptableObject.CreateInstance<T>();
+        AssetDatabase.CreateAsset(data, fullNewPath);
         return data;
+    }
+    void AutoLinkRewardsToManager()
+    {
+        LevelUpManager manager = FindObjectOfType<LevelUpManager>();
+
+        // 씬에 없으면 프리팹 검색
+        if (manager == null)
+        {
+            string[] guids = AssetDatabase.FindAssets("t:Prefab LevelUpManager");
+            if (guids.Length > 0)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                manager = prefab.GetComponent<LevelUpManager>();
+            }
+        }
+
+        if (manager != null)
+        {
+            string folderPath = "Assets/_Project/SO/Rewards";
+            string[] guids = AssetDatabase.FindAssets("t:LevelUpRewardSO", new[] { folderPath });
+
+            List<LevelUpRewardSO> allRewards = new List<LevelUpRewardSO>();
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                LevelUpRewardSO so = AssetDatabase.LoadAssetAtPath<LevelUpRewardSO>(path);
+                if (so != null) allRewards.Add(so);
+            }
+
+            manager.rewardPool = allRewards;
+            EditorUtility.SetDirty(manager);
+            Debug.Log($"<color=green>LevelUpManager에 {allRewards.Count}개의 보상 데이터가 자동 연결되었습니다!</color>");
+        }
+        else
+        {
+            Debug.LogWarning("LevelUpManager를 찾을 수 없어 자동 연결에 실패했습니다.");
+        }
     }
 
     // 이름으로 프리팹 찾기
     GameObject FindPrefabByName(string prefabName)
     {
         if (string.IsNullOrEmpty(prefabName)) return null;
+        prefabName = prefabName.Replace("\"", "");
         string[] guids = AssetDatabase.FindAssets($"{prefabName} t:Prefab");
         if (guids.Length > 0)
         {

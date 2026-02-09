@@ -9,19 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 87c750a65c33727498d1c673ea860bb2, type: 3}
-  m_Name: Weapon_2001_IronSword
+  m_Script: {fileID: 11500000, guid: 39dd48f8b9a40eb42ba4d4f8240b2d83, type: 3}
+  m_Name: "Reward_4004_\uCCA0\uAC11_\uD53C\uBD80"
   m_EditorClassIdentifier: 
-  weaponName: 
-  weaponType: 0
-  grade: 0
-  description: 
+  title: "\uCCA0\uAC11 \uD53C\uBD80"
+  description: "\uBC29\uC5B4\uB825\uC774 1 \uC99D\uAC00\uD569\uB2C8\uB2E4."
   icon: {fileID: 0}
-  baseDamage: 0
-  attackSpeed: 0
-  range: 0
-  projectileSpeed: 0
-  amount: 1
-  pierce: 0
-  knockback: 0
-  projectilePrefab: {fileID: 0}
+  statType: 3
+  weaponType: 0
+  value: 1

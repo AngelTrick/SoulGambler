@@ -121627,6 +121627,7 @@ MonoBehaviour:
     defenseLevel: 0
     critChanceLevel: 0
     magnetLevel: 0
+    contractBonusList: []
   currentStageGold: 0
 --- !u!1 &544232168
 GameObject:
@@ -121710,14 +121711,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   optionCount: 3
+  rewardPool:
+  - {fileID: 11400000, guid: 447429ad216aaa54abd8da1a518cfec7, type: 2}
+  - {fileID: 11400000, guid: 42e04c61fe148a142ab0fee9eb94ed0f, type: 2}
+  - {fileID: 11400000, guid: 23dc32ec663f0d9448b321b6169f78b4, type: 2}
+  - {fileID: 11400000, guid: 5608d8b19ec4a274ebb1c2cfc8ad36f0, type: 2}
+  - {fileID: 11400000, guid: 807b3b79c4028e84796747e292492470, type: 2}
+  - {fileID: 11400000, guid: fa685798e3078874c9f494ac9e66219c, type: 2}
+  - {fileID: 11400000, guid: 3806e59e82b4d1446872413a10b6f0ad, type: 2}
+  - {fileID: 11400000, guid: 81b39f7e03a7aec4c8f692b6ef1c3944, type: 2}
+  - {fileID: 11400000, guid: 0532de0442c100045b6d10212907e1e5, type: 2}
+  - {fileID: 11400000, guid: 9d8d2b44093261d4d9b192d87da3f307, type: 2}
+  - {fileID: 11400000, guid: b1179191bc39aaf489cf4ca3331e699e, type: 2}
   currentRewards:
   - type: 0
     title: 
     description: 
     icon: {fileID: 0}
-    weaponData: {fileID: 0}
     statType: 0
     statValue: 0
+    weaponData: {fileID: 0}
+    weaponUpgradeType: 0
 --- !u!1 &574177996
 GameObject:
   m_ObjectHideFlags: 0

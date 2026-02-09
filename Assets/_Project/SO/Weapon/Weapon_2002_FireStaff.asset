@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c750a65c33727498d1c673ea860bb2, type: 3}
   m_Name: Weapon_2002_FireStaff
   m_EditorClassIdentifier: 
-  weaponName: FireStaff
+  weaponName: 
   weaponType: 0
   grade: 0
-  description: "\uB9C8\uBC95\uC0AC\uC758 \uC9C0\uD321\uC774"
+  description: 
   icon: {fileID: 0}
-  baseDamage: 25
-  attackSpeed: 0.8
-  range: 8
-  projectileSpeed: 10
+  baseDamage: 0
+  attackSpeed: 0
+  range: 0
+  projectileSpeed: 0
   amount: 1
   pierce: 0
-  knockback: 0.5
+  knockback: 0
   projectilePrefab: {fileID: 0}
