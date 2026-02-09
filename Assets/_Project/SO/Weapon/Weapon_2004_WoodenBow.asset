@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c750a65c33727498d1c673ea860bb2, type: 3}
   m_Name: Weapon_2004_WoodenBow
   m_EditorClassIdentifier: 
-  weaponName: WoodenBow
+  weaponName: 
   weaponType: 0
   grade: 0
-  description: "\uAD81\uC218\uC758 \uD65C"
+  description: 
   icon: {fileID: 0}
-  baseDamage: 12
-  attackSpeed: 1.8
-  range: 10
-  projectileSpeed: 15
+  baseDamage: 0
+  attackSpeed: 0
+  range: 0
+  projectileSpeed: 0
   amount: 1
-  pierce: 1
-  knockback: 0.5
+  pierce: 0
+  knockback: 0
   projectilePrefab: {fileID: 0}
