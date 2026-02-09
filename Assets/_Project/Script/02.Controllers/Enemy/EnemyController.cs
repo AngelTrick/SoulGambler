@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem.Processors;
 using UnityEngine.UIElements;
 using DG.Tweening;
-
+[RequireComponent(typeof(Rigidbody))]
 public class EnemyController : MonoBehaviour
 {
     #region 상태머신 및 선언
@@ -20,7 +20,6 @@ public class EnemyController : MonoBehaviour
     [HideInInspector] public Animator _animator;
     [HideInInspector] public SpriteRenderer _sr;
     [HideInInspector] public Collider _col;
-
     [HideInInspector] public Transform _target;
 
     private float _currentHP;
@@ -29,13 +28,32 @@ public class EnemyController : MonoBehaviour
     private static readonly int HashDead = Animator.StringToHash("Dead");
 
     private bool isKnockback = false;
-    
+    private bool _isDead = false; 
 
     public float MoveSpeed => enemyData != null ? enemyData.moveSpeed : 3f;
     public float AttackRange => enemyData != null ? enemyData.attackRange : 1f;
     public float DetectRange => enemyData != null ? enemyData.detectRange : 10f;
     public float Damage => enemyData != null ? enemyData.damage : 10f;
     public float Defense => enemyData != null ? enemyData.defense : 0f;
+
+    private void OnEnable()
+    {
+        if(PlayerController.Instance != null)
+        {
+            PlayerController.Instance.OnPlayerDie += HandlePlayerDie;
+        }
+    }
+    private void OnDisable()
+    {
+        if (PlayerController.Instance != null)
+        {
+            PlayerController.Instance.OnPlayerDie -= HandlePlayerDie;
+        }
+    }
+    void HandlePlayerDie()
+    {
+        enabled = false;
+    }
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
@@ -57,6 +75,7 @@ public class EnemyController : MonoBehaviour
         if (_rb != null) _rb.velocity = Vector3.zero;
 
         isKnockback = false;
+        _isDead = false;
 
         if (PlayerController.Instance != null)
         {
@@ -111,11 +130,10 @@ public class EnemyController : MonoBehaviour
         }
 
     }
-    private bool _isDead = false;
     public void OnDead()
     {
         if (GameManager.Instance != null) GameManager.Instance.AddkillCount();
-        if (DataManager.instance != null && enemyData != null) DataManager.instance.AddStageGold(enemyData.goldReward);
+        if (DataManager.Instance != null && enemyData != null) DataManager.Instance.AddStageGold(enemyData.goldReward);
 
         if (GameManager.Instance != null && GameManager.Instance.expGemPrefab != null)
         {
@@ -130,7 +148,7 @@ public class EnemyController : MonoBehaviour
         if (_rb != null) _rb.velocity = Vector3.zero;
         if (_animator != null) _animator.SetTrigger(HashDead);
 
-        Invoke("ReturnToPool", 0.5f);
+        DOVirtual.DelayedCall(0.5f, () => ReturnToPool());
     }
     private void ReturnToPool()
     {
