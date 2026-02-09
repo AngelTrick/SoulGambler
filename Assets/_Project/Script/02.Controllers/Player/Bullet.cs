@@ -10,15 +10,19 @@ public class Bullet : MonoBehaviour
 
     private int _pierceCount;
     private float _knockBack;
+    private Coroutine _despawnCoroutine;
 
-    public void Init(WeaponDataSO data, float damageMultiplier, Vector3 dir)
+    public void Init(WeaponDataSO data, float damageMultiplier, Vector3 dir,
+        int bonusPierce = 0, float bonusKnockback = 0f, float areaScale = 1.0f)
     {
         _damage = data.baseDamage * damageMultiplier;
         _speed = data.projectileSpeed;
         _direction = dir.normalized;
 
-        _pierceCount = data.pierce;
-        _knockBack = data.knockback;
+        _pierceCount = data.pierce + bonusPierce;
+        _knockBack = data.knockback + bonusKnockback;
+
+        transform.localScale = Vector3.one * areaScale;
 
         if(_direction != Vector3.zero)
         {
@@ -26,8 +30,8 @@ public class Bullet : MonoBehaviour
             transform.rotation = Quaternion.Euler(90, lookRot.eulerAngles.y, 0);
         }
 
-        CancelInvoke(nameof(Despawn));
-        Invoke(nameof(Despawn), 3f);
+        if (_despawnCoroutine != null) StopCoroutine(_despawnCoroutine);
+        _despawnCoroutine = StartCoroutine(CoDespawn(3f));
     }
     private void Update()
     {
@@ -35,27 +39,28 @@ public class Bullet : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy"))
+        if (other.CompareTag("Enemy") == false) return;
+        if(other.TryGetComponent(out EnemyController enemy))
         {
-            EnemyController enemy = other.GetComponent<EnemyController>();
-            if(enemy != null)
+            enemy.TakeDamage(_damage);
+            if(_knockBack > 0)
             {
-                enemy.TakeDamage(_damage);
-                if(_knockBack > 0)
-                {
-                    enemy.KnockBack(_direction, _knockBack);
-                }
+                enemy.KnockBack(_direction, _knockBack);
             }
-            if (_pierceCount > 0)
-            {
-                _pierceCount--;
-            }
-            else 
-            {
-                Despawn();
-            }
-
         }
+            
+        if (_pierceCount > 0)
+        {
+           _pierceCount--;
+            return;
+        }
+        
+        Despawn();
+    }
+    private IEnumerator CoDespawn(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Despawn();
     }
     private void Despawn()
     {

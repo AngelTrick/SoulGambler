@@ -18,9 +18,10 @@ public class RewardOption
     public string description;
     public Sprite icon;
 
-    public WeaponDataSO weaponData;
-
     public StatType statType;
     public float statValue;
+    public WeaponDataSO weaponData;
+
+    public WeaponUpgradeType weaponUpgradeType;
 
 }
