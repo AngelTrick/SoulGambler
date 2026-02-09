@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c750a65c33727498d1c673ea860bb2, type: 3}
   m_Name: Weapon_2005_HolyMace
   m_EditorClassIdentifier: 
-  weaponName: HolyMace
-  weaponType: 1
-  grade: 1
-  description: "\uC131\uC9C1\uC790\uC758 \uBA54\uC774\uC2A4"
+  weaponName: 
+  weaponType: 0
+  grade: 0
+  description: 
   icon: {fileID: 0}
-  baseDamage: 20
-  attackSpeed: 0.6
-  range: 2
+  baseDamage: 0
+  attackSpeed: 0
+  range: 0
   projectileSpeed: 0
   amount: 1
   pierce: 0
-  knockback: 3
+  knockback: 0
   projectilePrefab: {fileID: 0}
