@@ -67,6 +67,7 @@ public class WeaponSystem : MonoBehaviour
     private bool _isFiringPressed = false;
     private bool _isAttacking = false;
     private InputAction _attackAction;
+    private Collider[] _targetBuffer = new Collider[20];
 
     private Vector3 _defaultHiboxScale;
     private void Awake()
@@ -143,16 +144,19 @@ public class WeaponSystem : MonoBehaviour
     }
     void FindNearestEnemy()
     {
-        Collider[] enemies = Physics.OverlapSphere(transform.position, currentWeapon.range);
+        int count = Physics.OverlapSphereNonAlloc(transform.position, currentWeapon.range, _targetBuffer);
 
         Transform nearest = null;
         float minDistance = Mathf.Infinity;
-        foreach (Collider col in enemies)
+        for (int i = 0; i < count; i++)
         {
+            Collider col = _targetBuffer[i]; // 버퍼에서 꺼내 씀
+
+            // 적 태그 확인 (레이어로 필터링하면 더 좋음)
             if (col.CompareTag("Enemy"))
             {
                 float dist = Vector3.Distance(transform.position, col.transform.position);
-                if(dist < minDistance)
+                if (dist < minDistance)
                 {
                     minDistance = dist;
                     nearest = col.transform;
@@ -189,7 +193,9 @@ public class WeaponSystem : MonoBehaviour
         float finalScale = 1.0f + _runBonusArea;
         for(int i = 0;  i < totalProjectile; i++)
         {
-            GameObject bulletObj = Instantiate(currentWeapon.projectilePrefab, spawnPos, Quaternion.identity);
+            GameObject bulletObj = PoolManager.Instance.Get(currentWeapon.projectilePrefab);
+            bulletObj.transform.position = spawnPos;
+            bulletObj.transform.rotation = Quaternion.identity;
             Bullet bulletScript = bulletObj.GetComponent<Bullet>();
 
             if(bulletScript != null)
@@ -197,6 +203,7 @@ public class WeaponSystem : MonoBehaviour
                 float damageMultiplier = (PlayerController.Instance.currentStance == PlayerStance.Dark) ? 1.5f : 1.0f;
                 // 여러 발 일 경우 사이 각도 좀 더 벌려 주는 로직 추가 예정
                 bulletScript.Init(
+                    currentWeapon.projectilePrefab,
                     currentWeapon,
                     damageMultiplier,
                     baseDir,

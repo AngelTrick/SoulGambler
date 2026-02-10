@@ -153,9 +153,9 @@ public class EnemyController : MonoBehaviour
     private void ReturnToPool()
     {
         _isDead = false;
-        if (PoolManager.instance != null)
+        if (PoolManager.Instance != null)
         {
-            PoolManager.instance.Return(gameObject, _originalPrefab);
+            PoolManager.Instance.Return(gameObject, _originalPrefab);
         }
         else
         {

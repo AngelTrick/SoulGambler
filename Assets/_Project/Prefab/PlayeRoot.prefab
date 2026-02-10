@@ -201,16 +201,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddd7f0d37d3b0184ea8790f3a9efa0be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerData: {fileID: 11400000, guid: 1ab6e25d1569b99418c6a63b5d8c968f, type: 2}
+  playerData: {fileID: 11400000, guid: af7dafa24e36c9d47b8fdbc3901f9b1a, type: 2}
   currentStance: 0
   lightColor: {r: 1, g: 1, b: 1, a: 1}
   darkColor: {r: 0.8, g: 0.4, b: 1, a: 1}
-  currentMaxHP: 0
-  currentMoveSpeed: 0
-  currentDamage: 0
+  _currentHP: 0
+  _runBounsHP: 0
+  _runBounsDamage: 0
+  _runBounsSpeed: 0
+  _runBounsDefense: 0
+  _runBounsCritChance: 0
+  _isDashing: 0
+  _isInvincible: 0
+  _isDead: 0
   currentAttackCoolDown: 0
-  startDiceValue: 0
-  weaponHitbox: {fileID: 5351546527092453264}
 --- !u!114 &1319043879315478293
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -304,10 +308,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56e7c47f1cf4d344c9fc812fd6de2292, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWeapon: {fileID: 11400000, guid: 71ce408dd361a9645bdb0adc29c3306b, type: 2}
+  currentWeapon: {fileID: 11400000, guid: e6da3f5803fb1074aafc5cc19f5a1dc2, type: 2}
   firePoint: {fileID: 4656058357150102301}
   weaponHitbox: {fileID: 0}
   currentMode: 0
+  _runBonusProjectileCount: 0
+  _runBonusAttackSpeed: 0
+  _runBonusPirece: 0
+  _runBonusArea: 0
+  _runBonusKnockback: 0
+  _runBonusCoolDown: 0
+  _target: {fileID: 0}
 --- !u!1 &5351546527092453264
 GameObject:
   m_ObjectHideFlags: 0

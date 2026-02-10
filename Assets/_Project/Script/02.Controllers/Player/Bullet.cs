@@ -12,9 +12,13 @@ public class Bullet : MonoBehaviour
     private float _knockBack;
     private Coroutine _despawnCoroutine;
 
-    public void Init(WeaponDataSO data, float damageMultiplier, Vector3 dir,
+    private GameObject _originalPrefab;
+
+    public void Init(GameObject prefab,WeaponDataSO data, float damageMultiplier, Vector3 dir,
         int bonusPierce = 0, float bonusKnockback = 0f, float areaScale = 1.0f)
     {
+        _originalPrefab = prefab;
+
         _damage = data.baseDamage * damageMultiplier;
         _speed = data.projectileSpeed;
         _direction = dir.normalized;
@@ -64,6 +68,13 @@ public class Bullet : MonoBehaviour
     }
     private void Despawn()
     {
-        gameObject.SetActive(false);
+        if(PoolManager.Instance != null)
+        {
+            PoolManager.Instance.Return(gameObject, _originalPrefab);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }

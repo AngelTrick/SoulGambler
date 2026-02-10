@@ -124132,10 +124132,21 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 857653143437740849, guid: 00a81d46fd62d3543b3aa1ef7c1d2afb,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 1708327302, guid: 7157e55f90c777f4a9f281ba9fa027b4,
+        type: 3}
     - target: {fileID: 1319043879315478293, guid: 00a81d46fd62d3543b3aa1ef7c1d2afb,
         type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2655801901965916640, guid: 00a81d46fd62d3543b3aa1ef7c1d2afb,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3912433951693874210, guid: 00a81d46fd62d3543b3aa1ef7c1d2afb,
         type: 3}
@@ -124151,7 +124162,7 @@ PrefabInstance:
         type: 3}
       propertyPath: currentWeapon
       value: 
-      objectReference: {fileID: 11400000, guid: 0d172903d836b054dadb1aa2e5f93bb8,
+      objectReference: {fileID: 11400000, guid: 76887395e644829418504e651870e852,
         type: 2}
     - target: {fileID: 4316218929651301356, guid: 00a81d46fd62d3543b3aa1ef7c1d2afb,
         type: 3}
