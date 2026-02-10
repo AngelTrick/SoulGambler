@@ -10,6 +10,7 @@ public class RewardUI : MonoBehaviour
     public Image iconImage;
     public TextMeshProUGUI titleText;
     public TextMeshProUGUI descText;
+    public TextMeshProUGUI valueText;
     public Button selectButton;
 
     private int _index;

@@ -69,6 +69,7 @@ public class SheetImporter : EditorWindow
     async void SyncData()
     {
         Debug.Log("데이터 동기화 시작");
+        _processedAssets.Clear();
         //1. Character
         string charData = await DownloadCSV(GetDownloadUrl(SHEET_NAME_CHAR));
         if (charData != null) ImportCharacters(charData);
@@ -149,7 +150,9 @@ public class SheetImporter : EditorWindow
             data.magnet = ParseFloat(row, 8);
             data.luck = ParseFloat(row, 9);
 
-            _processedAssets.Add(AssetDatabase.GetAssetPath(data));
+            EditorUtility.SetDirty(data);
+
+            RegisterAssetPath(savePath, fileName);
         }
     }
 
@@ -204,7 +207,9 @@ public class SheetImporter : EditorWindow
                 if (prefab != null) data.projectilePrefab = prefab;
             }
 
-            _processedAssets.Add(AssetDatabase.GetAssetPath(data));
+            EditorUtility.SetDirty(data);
+
+            RegisterAssetPath(savePath, fileName);
         }
     }
 
@@ -252,7 +257,9 @@ public class SheetImporter : EditorWindow
             data.expReward = ParseInt(row, 10);
             data.goldReward = ParseInt(row, 11);
 
-            _processedAssets.Add(AssetDatabase.GetAssetPath(data));
+            EditorUtility.SetDirty(data);
+
+            RegisterAssetPath(savePath, fileName);
         }
     }
     // ---------------------------------------------------------
@@ -288,7 +295,7 @@ public class SheetImporter : EditorWindow
             if (System.Enum.TryParse(typeStr, true, out WeaponUpgradeType wType))
             {
                 data.weaponType = wType;
-                data.statType = StatType.MaxHP;
+                data.statType = StatType.None;
             }
             else if(System.Enum.TryParse(typeStr, true , out StatType sType))
             {
@@ -383,7 +390,7 @@ public class SheetImporter : EditorWindow
         if (index >= row.Length) return defaultValue;
         string value = row[index].Trim();
         value = value.Replace("\"", "");
-        if (float.TryParse(value, out float result)) return result;
+        if (float.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out float result)) return result;
         return defaultValue;
     }
 

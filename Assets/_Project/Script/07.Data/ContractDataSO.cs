@@ -9,6 +9,7 @@ public enum ContractType
 }
 public enum StatType
 {
+    None,
     MaxHP,
     Damage,
     MoveSpeed,

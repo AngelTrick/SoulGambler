@@ -50,7 +50,7 @@ public class EnemySpawner : MonoBehaviour
     }
     void SpawnEnemy()
     {
-        GameObject enemy = PoolManager.instance.Get(enemyPrefab);
+        GameObject enemy = PoolManager.Instance.Get(enemyPrefab);
         Vector3 spawnPos = Vector3.zero;
         if (player != null)
         {

@@ -6,14 +6,14 @@ using UnityEngine.SceneManagement;
 
 public class PoolManager : MonoBehaviour
 {
-    public static PoolManager instance;
+    public static PoolManager Instance;
 
     private Dictionary<int,Queue<GameObject>> poolDictionary  = new Dictionary<int, Queue<GameObject>>();
     public void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
