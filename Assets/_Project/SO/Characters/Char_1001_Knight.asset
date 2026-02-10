@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2a72a323466acc4989eb33f699faad4, type: 3}
   m_Name: Char_1001_Knight
   m_EditorClassIdentifier: 
-  jobName: 
-  maxHP: 100
-  defense: 0
-  moveSpeed: 5
+  jobName: Knight
+  maxHP: 150
+  defense: 5
+  moveSpeed: 4
   damage: 10
   critChance: 5
   critDamage: 1.5

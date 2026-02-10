@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2a72a323466acc4989eb33f699faad4, type: 3}
   m_Name: Char_1005_Priest
   m_EditorClassIdentifier: 
-  jobName: 
-  maxHP: 100
-  defense: 0
-  moveSpeed: 5
-  damage: 10
+  jobName: Priest
+  maxHP: 120
+  defense: 3
+  moveSpeed: 4
+  damage: 8
   critChance: 5
   critDamage: 1.5
   magnet: 2
-  luck: 1
+  luck: 2
   dashDuration: 0.2
   dashCooldown: 2
   attackCooldown: 0.5
