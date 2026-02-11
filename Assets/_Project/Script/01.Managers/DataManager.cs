@@ -1,12 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
 using System.Text;
-using JetBrains.Annotations;
-using UnityEngine.UIElements;
-using UnityEngine.Rendering.Universal;
-using UnityEditor.ShaderGraph.Drawing.Inspector.PropertyDrawers;
+using UnityEngine;
 public class DataManager : MonoBehaviour
 {
     private static DataManager _instance;

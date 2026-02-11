@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "NewStatReward", menuName = "SO/LevelUpReward")]
 public class LevelUpRewardSO : ScriptableObject

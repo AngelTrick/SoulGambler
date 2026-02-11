@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class ExpGem : MonoBehaviour
@@ -44,7 +41,7 @@ public class ExpGem : MonoBehaviour
             }
             if (Vector3.Distance(transform.position, _targetPlayer.position) < detectRange)
             {
-                isMagnet = true ;
+                isMagnet = true;
             }
         } 
     }

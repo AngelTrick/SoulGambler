@@ -1,9 +1,9 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using DG.Tweening;
 
 
 public class UIManager : MonoBehaviour
@@ -32,13 +32,41 @@ public class UIManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
     }
+
+    private void OnEnable()
+    {
+        if (PlayerController.Instance != null)
+            PlayerController.Instance.OnHpChanged += UpdateHP;
+        
+        if(GameManager.Instance != null)
+        {
+            GameManager.Instance.OnExpChanged += UpdateExp;
+            GameManager.Instance.OnLevelChanged += UpdateLevel;
+            GameManager.Instance.OnKillCountChanged += UpdateKillCount;
+            GameManager.Instance.OnTimeUpdated += UpdateTimer;
+        }
+    }
+    private void OnDisable()
+    {
+        if (PlayerController.Instance != null)
+            PlayerController.Instance.OnHpChanged -= UpdateHP;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnExpChanged -= UpdateExp;
+            GameManager.Instance.OnLevelChanged -= UpdateLevel;
+            GameManager.Instance.OnKillCountChanged -= UpdateKillCount;
+            GameManager.Instance.OnTimeUpdated -= UpdateTimer;
+        }
+    }
     public void UpdateHP(float current, float max)
     {
         if (hpBar == null) return;
-        float target = current / max;
+        float target = (max > 0) ? current / max : 0;
 
         if (Mathf.Abs(hpBar.fillAmount - target) > 0.01f)
             hpBar.DOFillAmount(target, 0.2f);
+        else hpBar.fillAmount = target;
         
     }
     public void UpdateExp(float current,float max)
@@ -117,7 +145,12 @@ public class UIManager : MonoBehaviour
             if(i < rewards.Count)
             {
                 rewardButtons[i].gameObject.SetActive(true);
-                rewardButtons[i].Init(i, rewards[i]);
+                RewardOption option = rewards[i];
+
+                rewardButtons[i].Init(option, () =>
+                {
+                    LevelUpManager.Instance.SelectReward(option);
+                });
             }
             else
             {
