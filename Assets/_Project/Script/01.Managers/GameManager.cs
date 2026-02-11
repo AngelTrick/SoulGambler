@@ -1,13 +1,18 @@
 using DG.Tweening;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+
+    public event Action<float, float> OnExpChanged;
+    public event Action<int> OnLevelChanged;
+    public event Action<int> OnKillCountChanged;
+    public event Action<float> OnTimeUpdated;
+
     [Header("Game Stat")]
     public bool isGameOver = false;
     public int killCount = 0;
@@ -42,15 +47,9 @@ public class GameManager : MonoBehaviour
         gameTime = 0f;
         Time.timeScale = 1f;
         if (player == null) player = FindObjectOfType<PlayerController>();
-        if(UIManager.Instance != null)
-        {
-            if (player != null)
-                UIManager.Instance.UpdateHP(player.CurrentHP, player.playerData.maxHP);
-            UIManager.Instance.UpdateExp(0, maxExp);
-            UIManager.Instance.UpdateLevel(level);
-            UIManager.Instance.ShowLevelUpUI(false);
-            UIManager.Instance.UpdateKillCount(0);
-        }
+        OnExpChanged?.Invoke(currentExp, maxExp);
+        OnLevelChanged?.Invoke(level);
+        OnKillCountChanged?.Invoke(killCount);
         if(PlayerController.Instance != null)
         {
             PlayerController.Instance.OnPlayerDie += OnGameOver;
@@ -60,11 +59,7 @@ public class GameManager : MonoBehaviour
     {
         if (isGameOver || player == null) return;
         gameTime += Time.deltaTime;
-        if(UIManager.Instance != null)
-        {
-            UIManager.Instance.UpdateHP(player.CurrentHP, player.playerData.maxHP);
-            UIManager.Instance.UpdateTimer(gameTime);
-        }
+        OnTimeUpdated?.Invoke(gameTime);
     }
     private void OnDisable()
     {
@@ -76,14 +71,16 @@ public class GameManager : MonoBehaviour
     public void GetExp(int amount)
     {
         currentExp += amount;
-        UIManager.Instance.UpdateExp(currentExp, maxExp);
         if (currentExp >= maxExp) LevelUp();
+        OnExpChanged?.Invoke(currentExp, maxExp);
     }
     void LevelUp()
     {
         level++;
         currentExp = 0;
         maxExp += 50;
+
+        OnLevelChanged?.Invoke(level);
         if(LevelUpManager.Instance != null)
         {
             List<RewardOption> rewards = LevelUpManager.Instance.GetRandomRewards();
@@ -91,8 +88,6 @@ public class GameManager : MonoBehaviour
 
         if(UIManager.Instance != null)
         {
-            UIManager.Instance.UpdateLevel(level);
-            UIManager.Instance.UpdateExp(0, maxExp);
             UIManager.Instance.ShowLevelUpUI(true);
         }
         Time.timeScale = 0f;
@@ -115,8 +110,7 @@ public class GameManager : MonoBehaviour
     public void AddkillCount()
     {
         killCount++;
-        if(UIManager.Instance != null)
-            UIManager.Instance.UpdateKillCount(killCount);
+        OnKillCountChanged?.Invoke(killCount);
     }
     public void OnGameOver()
     {
