@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 [CreateAssetMenu(fileName = "DefaultPlayerData", menuName = "SO/PlayerData")]
 public class PlayerDataSO : ScriptableObject

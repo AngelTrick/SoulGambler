@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c750a65c33727498d1c673ea860bb2, type: 3}
   m_Name: Weapon_2001_IronSword
   m_EditorClassIdentifier: 
-  weaponName: 
-  weaponType: 0
+  weaponName: IronSword
+  weaponType: 1
   grade: 0
-  description: 
+  description: "\uAE30\uC0AC\uC758 \uAE30\uBCF8 \uAC80"
   icon: {fileID: 0}
-  baseDamage: 0
-  attackSpeed: 0
-  range: 0
+  baseDamage: 15
+  attackSpeed: 1
+  range: 2.5
   projectileSpeed: 0
   amount: 1
   pierce: 0
-  knockback: 0
+  knockback: 2
   projectilePrefab: {fileID: 0}

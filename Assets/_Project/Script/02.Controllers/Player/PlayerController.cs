@@ -1,17 +1,16 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
-using UnityEngine.UIElements;
 public enum PlayerStance { Light, Dark};
 
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance;
+
+    public event Action<float, float> OnHpChanged;
+    public event Action OnPlayerDie;
     #region [1] 설정 및 데이터 (Configuration)
     [Header("Core Setting")]
     [Tooltip ("플레이어 기본 스텟 담긴 SO 파일")]
@@ -86,8 +85,6 @@ public class PlayerController : MonoBehaviour
     public bool IsAttacking => _isAttacking;
     public  bool IsDead => _isDead;
 
-
-    public event System.Action OnPlayerDie;
     //private InputAction _attackAction;
     private void Awake()
     {
@@ -110,8 +107,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Start()
     {
-        if (UIManager.Instance != null)
-            UIManager.Instance.UpdateHP(_currentHP, currentMaxHP);
+        OnHpChanged?.Invoke(_currentHP, currentMaxHP);
         ApplyStanceEffect();
     }
     void InitializeStats()
@@ -217,7 +213,7 @@ public class PlayerController : MonoBehaviour
     {
         float damage = currentDamage;
 
-        if(Random.Range(0f,100f) < currentCritChance)
+        if(UnityEngine.Random.Range(0f,100f) < currentCritChance)
         {
             damage *= playerData.critDamage;
         }
@@ -257,7 +253,7 @@ public class PlayerController : MonoBehaviour
 
         _currentHP -= finalDamage;
 
-        if (UIManager.Instance != null) UIManager.Instance.UpdateHP(_currentHP, currentMaxHP);
+        OnHpChanged?.Invoke(_currentHP, currentMaxHP);
         
         if(_currentHP <= 0) OnDie();
         else StartCoroutine(CoHIt());
@@ -353,7 +349,7 @@ public class PlayerController : MonoBehaviour
             case StatType.MaxHP:
                 _runBounsHP += value;
                 _currentHP += value;
-                if (UIManager.Instance != null) UIManager.Instance.UpdateHP(_currentHP, currentMaxHP);
+                OnHpChanged?.Invoke(_currentHP, currentMaxHP);
                 break;
             case StatType.Damage:
                 _runBounsDamage += value;

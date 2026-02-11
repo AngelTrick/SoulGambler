@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 public enum ContractType
 {
@@ -9,6 +7,7 @@ public enum ContractType
 }
 public enum StatType
 {
+    None,
     MaxHP,
     Damage,
     MoveSpeed,

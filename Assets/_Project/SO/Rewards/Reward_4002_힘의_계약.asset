@@ -15,6 +15,6 @@ MonoBehaviour:
   title: "\uD798\uC758 \uACC4\uC57D"
   description: "\uACF5\uACA9\uB825\uC774 3 \uC99D\uAC00\uD569\uB2C8\uB2E4."
   icon: {fileID: 0}
-  statType: 1
+  statType: 2
   weaponType: 0
   value: 3

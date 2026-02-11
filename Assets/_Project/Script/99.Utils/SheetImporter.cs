@@ -4,14 +4,12 @@
 // 기능: One-Key Sync, 스마트 업데이트, 자동 연결, 특수문자/따옴표 제거 파싱
 // ==========================================
 
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEngine;
-using UnityEditor;
 using System.IO;
-using UnityEngine.Networking;
 using System.Threading.Tasks;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Networking;
 
 public class SheetImporter : EditorWindow
 {
@@ -24,6 +22,7 @@ public class SheetImporter : EditorWindow
 
     private const string KEY_ID = "Sheet_Spreadsheet_ID";
 
+    private HashSet<string> _processedAssets = new HashSet<string>();
 
     [MenuItem("Tools/Google Sheet Importer(One-Key)")]
     public static void ShowWindow()
@@ -68,6 +67,7 @@ public class SheetImporter : EditorWindow
     async void SyncData()
     {
         Debug.Log("데이터 동기화 시작");
+        _processedAssets.Clear();
         //1. Character
         string charData = await DownloadCSV(GetDownloadUrl(SHEET_NAME_CHAR));
         if (charData != null) ImportCharacters(charData);
@@ -84,6 +84,7 @@ public class SheetImporter : EditorWindow
             ImportRewards(rewardData);
             AutoLinkRewardsToManager();
         }
+        CleanupMissingAssets();
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log($"<color=cyan>모든 데이터 동기화 및 갱신 완료!</color>");
@@ -133,7 +134,7 @@ public class SheetImporter : EditorWindow
             string id = ParseString(row, 0);
             string name = ParseString(row, 1);
             
-            string fileName = $"Char_{SanitizeFileName(id)} _ {SanitizeFileName(name)}.asset";
+            string fileName = $"Char_{SanitizeFileName(id)}_{SanitizeFileName(name)}.asset";
 
             PlayerDataSO data = FindAndRenameSO<PlayerDataSO>(savePath, id, fileName, "Char_");
 
@@ -146,6 +147,10 @@ public class SheetImporter : EditorWindow
             data.critDamage = ParseFloat(row, 7);
             data.magnet = ParseFloat(row, 8);
             data.luck = ParseFloat(row, 9);
+
+            EditorUtility.SetDirty(data);
+
+            RegisterAssetPath(savePath, fileName);
         }
     }
 
@@ -199,6 +204,10 @@ public class SheetImporter : EditorWindow
                 GameObject prefab = FindPrefabByName(prefabName);
                 if (prefab != null) data.projectilePrefab = prefab;
             }
+
+            EditorUtility.SetDirty(data);
+
+            RegisterAssetPath(savePath, fileName);
         }
     }
 
@@ -245,6 +254,10 @@ public class SheetImporter : EditorWindow
             data.attackRange = ParseFloat(row, 9);
             data.expReward = ParseInt(row, 10);
             data.goldReward = ParseInt(row, 11);
+
+            EditorUtility.SetDirty(data);
+
+            RegisterAssetPath(savePath, fileName);
         }
     }
     // ---------------------------------------------------------
@@ -268,9 +281,9 @@ public class SheetImporter : EditorWindow
             string id = ParseString(row, 0);
             string title = ParseString(row, 1);
             string safeTitle =SanitizeFileName(title.Replace(" ", "_"));
-            string FileName = $"Reward_{SanitizeFileName(id)}_{safeTitle}.asset";
+            string fileName = $"Reward_{SanitizeFileName(id)}_{safeTitle}.asset";
 
-            LevelUpRewardSO data = FindAndRenameSO<LevelUpRewardSO>(savePath, id, FileName, "Reward_");
+            LevelUpRewardSO data = FindAndRenameSO<LevelUpRewardSO>(savePath, id, fileName, "Reward_");
 
             data.title = title;
             data.description = ParseString(row,2);
@@ -280,7 +293,7 @@ public class SheetImporter : EditorWindow
             if (System.Enum.TryParse(typeStr, true, out WeaponUpgradeType wType))
             {
                 data.weaponType = wType;
-                data.statType = StatType.MaxHP;
+                data.statType = StatType.None;
             }
             else if(System.Enum.TryParse(typeStr, true , out StatType sType))
             {
@@ -293,9 +306,60 @@ public class SheetImporter : EditorWindow
             }
             EditorUtility.SetDirty(data);
 
+            RegisterAssetPath(savePath, fileName);
+
         }
         Debug.Log("보상(Reward) 데이터 갱신 완료 (무기 / 스탯 자동 분류)");
     }
+    void RegisterAssetPath(string folder, string fileName)
+    {
+        string fullPath = $"{folder}/{fileName}";
+        _processedAssets.Add(fullPath);
+    }
+    void CleanupMissingAssets()
+    {
+        string[] targetFolders = {
+            "Assets/_Project/SO/Characters",
+            "Assets/_Project/SO/Weapon",
+            "Assets/_Project/SO/Enemy",
+            "Assets/_Project/SO/Rewards"
+        };
+
+        int deletedCount = 0;
+
+        foreach (string folder in targetFolders)
+        {
+            if (!Directory.Exists(folder)) continue;
+
+            // [핵심 Fix] 파일 시스템에서 직접 파일을 찾습니다.
+            string[] files = Directory.GetFiles(folder, "*.asset");
+
+            foreach (string filePath in files)
+            {
+                // [핵심 Fix] 윈도우 경로(\)를 유니티 경로(/)로 바꿔서 비교해야 합니다.
+                string unityPath = filePath.Replace("\\", "/");
+
+                // 이번 Sync에서 등록되지 않은 파일이면 삭제
+                if (!_processedAssets.Contains(unityPath))
+                {
+                    string fileName = Path.GetFileName(unityPath);
+                    if (fileName.StartsWith("Char_") || fileName.StartsWith("Weapon_") ||
+                        fileName.StartsWith("Enemy_") || fileName.StartsWith("Reward_"))
+                    {
+                        AssetDatabase.DeleteAsset(unityPath);
+                        Debug.LogWarning($"[Cleanup] 삭제됨: {fileName}");
+                        deletedCount++;
+                    }
+                }
+            }
+        }
+
+        if (deletedCount > 0)
+        {
+            Debug.Log($"<color=yellow>총 {deletedCount}개의 미사용 에셋이 정리되었습니다.</color>");
+        }
+    }
+
     // ---------------------------------------------------------
     // [헬퍼 함수] 안전한 파싱 (데이터가 없거나 에러나면 기본값 리턴)
     // ---------------------------------------------------------
@@ -324,7 +388,7 @@ public class SheetImporter : EditorWindow
         if (index >= row.Length) return defaultValue;
         string value = row[index].Trim();
         value = value.Replace("\"", "");
-        if (float.TryParse(value, out float result)) return result;
+        if (float.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out float result)) return result;
         return defaultValue;
     }
 

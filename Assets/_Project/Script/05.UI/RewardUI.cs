@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class RewardUI : MonoBehaviour
 {
@@ -10,14 +9,14 @@ public class RewardUI : MonoBehaviour
     public Image iconImage;
     public TextMeshProUGUI titleText;
     public TextMeshProUGUI descText;
+    public TextMeshProUGUI valueText;
     public Button selectButton;
 
-    private int _index;
+    private Action _onClickCallBack;  
     
-    public void Init(int index, RewardOption option)
+    public void Init(RewardOption option, Action onClick)
     {
-        _index = index;
-
+        //UI °»½Å
         if (titleText != null) titleText.text = option.title;
         if (descText != null) descText.text = option.description;
 
@@ -33,14 +32,13 @@ public class RewardUI : MonoBehaviour
                 iconImage.enabled = false;
             }
         }
+
+        _onClickCallBack = onClick;
         selectButton.onClick.RemoveAllListeners();
         selectButton.onClick.AddListener(() => OnClickReward());
     }
     void OnClickReward()
     {
-        if(GameManager.Instance != null)
-        {
-            GameManager.Instance.SelectAugment(_index - 1);
-        }
+        _onClickCallBack?.Invoke();
     }
 }

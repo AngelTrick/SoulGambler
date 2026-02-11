@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 [System.Serializable]
 public struct Wave
 {
@@ -50,7 +47,7 @@ public class EnemySpawner : MonoBehaviour
     }
     void SpawnEnemy()
     {
-        GameObject enemy = PoolManager.instance.Get(enemyPrefab);
+        GameObject enemy = PoolManager.Instance.Get(enemyPrefab);
         Vector3 spawnPos = Vector3.zero;
         if (player != null)
         {
