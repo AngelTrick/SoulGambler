@@ -188,11 +188,22 @@ public class WeaponSystem : MonoBehaviour
 
         int totalProjectile = currentWeapon.amount + _runBonusProjectileCount;
         float finalScale = 1.0f + _runBonusArea;
+        // 부채꼴 확산 각도 계산
+        float angleStep = 15f;
+        float startAngle = 0f;
+        // 총알 2개 이상일 때만 각도를 계산해서 중앙 정렬
+        if (totalProjectile > 1) startAngle = -((totalProjectile - 1) * angleStep) / 2f;
         for(int i = 0;  i < totalProjectile; i++)
         {
+            float currentAngle = startAngle + (i * angleStep);
+
+            // baseDir를 Y축(Vector3.up) 기준으로 currentAngle만큼 회전
+            Quaternion rotation = Quaternion.AngleAxis(currentAngle, Vector3.up);
+            Vector3 finalDir = rotation * baseDir;
+
             GameObject bulletObj = PoolManager.Instance.Get(currentWeapon.projectilePrefab);
             bulletObj.transform.position = spawnPos;
-            bulletObj.transform.rotation = Quaternion.identity;
+            bulletObj.transform.rotation = Quaternion.LookRotation(finalDir);
             Bullet bulletScript = bulletObj.GetComponent<Bullet>();
 
             if(bulletScript != null)
@@ -203,7 +214,7 @@ public class WeaponSystem : MonoBehaviour
                     currentWeapon.projectilePrefab,
                     currentWeapon,
                     damageMultiplier,
-                    baseDir,
+                    finalDir,
                     _runBonusPirece,
                     _runBonusKnockback,
                     finalScale
