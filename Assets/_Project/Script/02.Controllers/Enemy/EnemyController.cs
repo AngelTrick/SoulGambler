@@ -1,3 +1,4 @@
+using Autodesk.Fbx;
 using DG.Tweening;
 using System.Collections;
 using UnityEngine;
@@ -32,6 +33,7 @@ public class EnemyController : MonoBehaviour
     public float Damage => enemyData != null ? enemyData.damage : 10f;
     public float Defense => enemyData != null ? enemyData.defense : 0f;
 
+    public GameObject damagePopupPrefab;
     private void OnEnable()
     {
         if(PlayerController.Instance != null)
@@ -105,11 +107,27 @@ public class EnemyController : MonoBehaviour
         _rb.velocity = Vector3.zero;
         isKnockback = false;
     }
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, bool isCritical = false)
     {
-        float fianlDamage = Mathf.Max(1, damage - Defense);
-        _currentHP -= fianlDamage;
+        float finalDamage = Mathf.Max(1, damage - Defense);
+        _currentHP -= finalDamage;
 
+
+        //데미지 팝업 로직
+        if(damagePopupPrefab != null && PoolManager.Instance != null)
+        {
+            // 1. 풀에서 가져오기 (위치 내 머리 위 + 랜덤성 약간)
+            GameObject popUp = PoolManager.Instance.Get(damagePopupPrefab);
+
+            // 위치 설정: 적의 위쪽 + 약간의 랜덤 좌우 (겹침 방지)
+            float randomX = Random.Range(-0.3f, 0.3f);
+            popUp.transform.position = transform.position + Vector3.up * 1.5f + new Vector3(randomX, 0, -2f);
+
+            // 2. 텍스트 세팅 (데미지, 프리팹 정보 전달)
+            // 크리티컬 여부는 현재 함수 인자에 없으므로 디폴트 false로 처리
+            DamagePopup popuScript = popUp.GetComponent<DamagePopup>();
+            if (popuScript != null) popuScript.Setup(finalDamage, damagePopupPrefab, isCritical);
+        }
         if (_sr != null)
         {
             _sr.DOKill();

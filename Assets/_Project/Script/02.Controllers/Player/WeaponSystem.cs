@@ -188,22 +188,35 @@ public class WeaponSystem : MonoBehaviour
 
         int totalProjectile = currentWeapon.amount + _runBonusProjectileCount;
         float finalScale = 1.0f + _runBonusArea;
+        // 부채꼴 확산 각도 계산
+        float angleStep = 15f;
+        float startAngle = 0f;
+        // 총알 2개 이상일 때만 각도를 계산해서 중앙 정렬
+        if (totalProjectile > 1) startAngle = -((totalProjectile - 1) * angleStep) / 2f;
         for(int i = 0;  i < totalProjectile; i++)
         {
+            float currentAngle = startAngle + (i * angleStep);
+
+            // baseDir를 Y축(Vector3.up) 기준으로 currentAngle만큼 회전
+            Quaternion rotation = Quaternion.AngleAxis(currentAngle, Vector3.up);
+            Vector3 finalDir = rotation * baseDir;
+
             GameObject bulletObj = PoolManager.Instance.Get(currentWeapon.projectilePrefab);
             bulletObj.transform.position = spawnPos;
-            bulletObj.transform.rotation = Quaternion.identity;
+            bulletObj.transform.rotation = Quaternion.LookRotation(finalDir);
             Bullet bulletScript = bulletObj.GetComponent<Bullet>();
 
             if(bulletScript != null)
             {
-                float damageMultiplier = (PlayerController.Instance.currentStance == PlayerStance.Dark) ? 1.5f : 1.0f;
-                // 여러 발 일 경우 사이 각도 좀 더 벌려 주는 로직 추가 예정
+                bool isCrit;
+
+                float finalDamage = PlayerController.Instance.GetFinalDamage(currentWeapon.baseDamage, out isCrit);
                 bulletScript.Init(
                     currentWeapon.projectilePrefab,
                     currentWeapon,
-                    damageMultiplier,
-                    baseDir,
+                    finalDamage,
+                    isCrit,
+                    finalDir,
                     _runBonusPirece,
                     _runBonusKnockback,
                     finalScale
@@ -218,11 +231,18 @@ public class WeaponSystem : MonoBehaviour
         _isAttacking = true;
         if (weaponHitbox != null)
         {
+            bool isCrit;
+            float finalDamage = PlayerController.Instance.GetFinalDamage(currentWeapon.baseDamage, out isCrit);
+
+            float totalKnockback = currentWeapon.knockback + _runBonusKnockback;
+
+            MeleeWeapon meleeScript = weaponHitbox.GetComponent<MeleeWeapon>();
+            if (meleeScript != null) meleeScript.Init(finalDamage, isCrit, totalKnockback);
             float scaleMultiplier = 1.0f + _runBonusArea;
             weaponHitbox.transform.localScale = _defaultHiboxScale * scaleMultiplier;
             weaponHitbox.SetActive(true);
             float duration = 0.3f * (1f - _runBonusCoolDown);
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(duration);
             weaponHitbox.SetActive(false);
             weaponHitbox.transform.localScale = _defaultHiboxScale;
         }
