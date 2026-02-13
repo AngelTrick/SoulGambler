@@ -55,6 +55,41 @@ public class GameManager : MonoBehaviour
             PlayerController.Instance.OnPlayerDie += OnGameOver;
         }
     }
+
+    //1. 경험치 구독 & 즉시 전송
+    public void SubscribeExp(Action<float, float> listener)
+    {
+        OnExpChanged += listener;
+        listener?.Invoke(currentExp, maxExp);
+    }
+    public void UnsubscribeExp(Action<float, float> listener) => OnExpChanged -= listener;
+
+    //2. 레벨 구족 & 즉시 전송
+    public void SubScribeLevel(Action<int> listener)
+    {
+        OnLevelChanged += listener;
+        listener?.Invoke(level);
+    }
+
+    public void UnsubscribeLevel(Action<int> listener) => OnLevelChanged -= listener;
+
+    //3. 킬카운트 구족 & 즉시 전송
+    public void SubscribeKillCount(Action<int> listener)
+    {
+        OnKillCountChanged += listener;
+        listener?.Invoke(killCount);
+    }
+
+    public void UnsubscribeKillCount(Action<int> listener) => OnKillCountChanged -= listener;
+
+    //4. 타이머 구독 & 즉시 전송
+    public void SubscribeTimer(Action<float> listener)
+    {
+        OnTimeUpdated += listener;
+        listener?.Invoke(gameTime);
+    }
+
+    public void UnsubscribeTimer(Action<float> listener) => OnTimeUpdated -= listener;
     private void Update()
     {
         if (isGameOver || player == null) return;

@@ -107,9 +107,26 @@ public class PlayerController : MonoBehaviour
     }
     private void Start()
     {
-        OnHpChanged?.Invoke(_currentHP, currentMaxHP);
         ApplyStanceEffect();
     }
+    /// <summary>
+    ///  스마트 구독 함수
+    /// </summary>
+    /// <param name="listener"></param>
+    public void SubscribeHP(Action<float, float> listener)
+    {
+        OnHpChanged += listener;
+        listener?.Invoke(_currentHP, currentMaxHP);
+    }
+    /// <summary>
+    ///  스마트 구독 함수 해지
+    /// </summary>
+    /// <param name="listener"></param>
+    public void UnsubcribeHP(Action<float, float> listener)
+    {
+        OnHpChanged -= listener;
+    }
+
     void InitializeStats()
     {
         // 1. 기본값
@@ -209,19 +226,24 @@ public class PlayerController : MonoBehaviour
         if (_sr != null) return;
         _sr.color = (currentStance == PlayerStance.Light) ? lightColor : darkColor;
     }
-    public float GetFinalDamage()
+    public float GetFinalDamage(float weaponBaseDamage, out bool isCritical)
     {
-        float damage = currentDamage;
+        // 1. (플레이어 스탯 공격력 + 무기 기본 공격력) 합산
+
+        float totalDamage = currentDamage + weaponBaseDamage;
+
+        isCritical = false;
 
         if(UnityEngine.Random.Range(0f,100f) < currentCritChance)
         {
-            damage *= playerData.critDamage;
+            totalDamage *= playerData.critDamage; // 기본 1.5배 or 2배
+            isCritical = true;
         }
         if(currentStance == PlayerStance.Dark)
         {
-            damage *= 1.5f;
+            totalDamage *= 1.5f;
         }
-        return damage;
+        return totalDamage;
     }
     private void TryDash()
     {
