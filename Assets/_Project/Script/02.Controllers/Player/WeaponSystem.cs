@@ -208,12 +208,14 @@ public class WeaponSystem : MonoBehaviour
 
             if(bulletScript != null)
             {
-                float damageMultiplier = (PlayerController.Instance.currentStance == PlayerStance.Dark) ? 1.5f : 1.0f;
-                // 여러 발 일 경우 사이 각도 좀 더 벌려 주는 로직 추가 예정
+                bool isCrit;
+
+                float finalDamage = PlayerController.Instance.GetFinalDamage(currentWeapon.baseDamage, out isCrit);
                 bulletScript.Init(
                     currentWeapon.projectilePrefab,
                     currentWeapon,
-                    damageMultiplier,
+                    finalDamage,
+                    isCrit,
                     finalDir,
                     _runBonusPirece,
                     _runBonusKnockback,
@@ -229,11 +231,18 @@ public class WeaponSystem : MonoBehaviour
         _isAttacking = true;
         if (weaponHitbox != null)
         {
+            bool isCrit;
+            float finalDamage = PlayerController.Instance.GetFinalDamage(currentWeapon.baseDamage, out isCrit);
+
+            float totalKnockback = currentWeapon.knockback + _runBonusKnockback;
+
+            MeleeWeapon meleeScript = weaponHitbox.GetComponent<MeleeWeapon>();
+            if (meleeScript != null) meleeScript.Init(finalDamage, isCrit, totalKnockback);
             float scaleMultiplier = 1.0f + _runBonusArea;
             weaponHitbox.transform.localScale = _defaultHiboxScale * scaleMultiplier;
             weaponHitbox.SetActive(true);
             float duration = 0.3f * (1f - _runBonusCoolDown);
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(duration);
             weaponHitbox.SetActive(false);
             weaponHitbox.transform.localScale = _defaultHiboxScale;
         }

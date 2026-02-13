@@ -5,6 +5,7 @@ public class Bullet : MonoBehaviour
 {
     private float _damage;
     private float _speed;
+    private bool _isCritical;
     private Vector3 _direction;
 
     private int _pierceCount;
@@ -13,12 +14,13 @@ public class Bullet : MonoBehaviour
 
     private GameObject _originalPrefab;
 
-    public void Init(GameObject prefab,WeaponDataSO data, float damageMultiplier, Vector3 dir,
+    public void Init(GameObject prefab,WeaponDataSO data, float realDamage,bool isCritical, Vector3 dir,
         int bonusPierce = 0, float bonusKnockback = 0f, float areaScale = 1.0f)
     {
         _originalPrefab = prefab;
 
-        _damage = data.baseDamage * damageMultiplier;
+        _damage = realDamage;
+        _isCritical = isCritical;
         _speed = data.projectileSpeed;
         _direction = dir.normalized;
 
@@ -45,7 +47,7 @@ public class Bullet : MonoBehaviour
         if (other.CompareTag("Enemy") == false) return;
         if(other.TryGetComponent(out EnemyController enemy))
         {
-            enemy.TakeDamage(_damage);
+            enemy.TakeDamage(_damage, _isCritical);
             if(_knockBack > 0)
             {
                 enemy.KnockBack(_direction, _knockBack);

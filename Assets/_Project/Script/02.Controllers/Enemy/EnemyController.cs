@@ -107,7 +107,7 @@ public class EnemyController : MonoBehaviour
         _rb.velocity = Vector3.zero;
         isKnockback = false;
     }
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, bool isCritical = false)
     {
         float finalDamage = Mathf.Max(1, damage - Defense);
         _currentHP -= finalDamage;
@@ -121,12 +121,12 @@ public class EnemyController : MonoBehaviour
 
             // 위치 설정: 적의 위쪽 + 약간의 랜덤 좌우 (겹침 방지)
             float randomX = Random.Range(-0.3f, 0.3f);
-            popUp.transform.position = transform.position + Vector3.up * 1.5f + new Vector3(randomX, 0, 0);
+            popUp.transform.position = transform.position + Vector3.up * 1.5f + new Vector3(randomX, 0, -2f);
 
             // 2. 텍스트 세팅 (데미지, 프리팹 정보 전달)
             // 크리티컬 여부는 현재 함수 인자에 없으므로 디폴트 false로 처리
             DamagePopup popuScript = popUp.GetComponent<DamagePopup>();
-            if (popuScript != null) popuScript.Setup(finalDamage, damagePopupPrefab, false);
+            if (popuScript != null) popuScript.Setup(finalDamage, damagePopupPrefab, isCritical);
         }
         if (_sr != null)
         {
