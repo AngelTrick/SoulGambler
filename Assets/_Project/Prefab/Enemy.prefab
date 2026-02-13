@@ -103,6 +103,8 @@ MonoBehaviour:
   _sr: {fileID: 0}
   _col: {fileID: 0}
   _target: {fileID: 0}
+  damagePopupPrefab: {fileID: 7106144340001419994, guid: 571ee34804a41164cbed83c173d7ed3c,
+    type: 3}
 --- !u!1 &5209645016854944807
 GameObject:
   m_ObjectHideFlags: 0

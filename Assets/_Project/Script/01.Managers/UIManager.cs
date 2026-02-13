@@ -36,27 +36,27 @@ public class UIManager : MonoBehaviour
     private void OnEnable()
     {
         if (PlayerController.Instance != null)
-            PlayerController.Instance.OnHpChanged += UpdateHP;
+            PlayerController.Instance.SubscribeHP(UpdateHP);
         
         if(GameManager.Instance != null)
         {
-            GameManager.Instance.OnExpChanged += UpdateExp;
-            GameManager.Instance.OnLevelChanged += UpdateLevel;
-            GameManager.Instance.OnKillCountChanged += UpdateKillCount;
-            GameManager.Instance.OnTimeUpdated += UpdateTimer;
+            GameManager.Instance.SubscribeExp(UpdateExp);
+            GameManager.Instance.SubScribeLevel(UpdateLevel);
+            GameManager.Instance.SubscribeKillCount(UpdateKillCount);
+            GameManager.Instance.SubscribeTimer(UpdateTimer);
         }
     }
     private void OnDisable()
     {
         if (PlayerController.Instance != null)
-            PlayerController.Instance.OnHpChanged -= UpdateHP;
+            PlayerController.Instance.UnsubcribeHP(UpdateHP);
 
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.OnExpChanged -= UpdateExp;
-            GameManager.Instance.OnLevelChanged -= UpdateLevel;
-            GameManager.Instance.OnKillCountChanged -= UpdateKillCount;
-            GameManager.Instance.OnTimeUpdated -= UpdateTimer;
+            GameManager.Instance.UnsubscribeExp(UpdateExp);
+            GameManager.Instance.UnsubscribeLevel(UpdateLevel);
+            GameManager.Instance.UnsubscribeKillCount(UpdateKillCount);
+            GameManager.Instance.UnsubscribeTimer(UpdateTimer);
         }
     }
     public void UpdateHP(float current, float max)
